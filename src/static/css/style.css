@@ -9,3 +9,7 @@ body { background-color: theme('colors.surface-dim'); color: theme('colors.on-su
         .status-chip { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-family: theme('fontFamily.data-mono'); font-size: 10px; font-weight: 700; text-transform: uppercase; }
         .status-chip.success { background-color: rgba(16, 185, 129, 0.1); color: #10B981; }
         .status-chip.warning { background-color: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+        
+        /* Custom Scrollbar - Hide scrollbar but keep functionality */
+        .custom-scrollbar::-webkit-scrollbar { display: none; }
+        .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

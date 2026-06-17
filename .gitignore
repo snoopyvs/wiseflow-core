@@ -1,0 +1,19 @@
+# macOS system files
+.DS_Store
+
+# Python environment & caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# Sensitive environment variables
+.env
+
+# Data caches / IDE files
+.vscode/
+.idea/

@@ -7,14 +7,14 @@
 
 
 <!-- Main Content Area -->
-<main class="flex-1 ml-0 md:ml-sidebar_width min-h-screen flex flex-col relative">
+<main class="pl-sidebar_width w-full min-h-screen flex flex-col relative">
 <!-- Header / Controls -->
-<header class="px-stack_lg py-stack_md border-b border-outline-variant bg-surface-container flex flex-col md:flex-row justify-between items-start md:items-center gap-stack_md">
-<div>
+<header class="h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center px-container_padding shrink-0 z-40">
+<div class="flex items-center gap-3">
 <h2 class="font-headline-md text-headline-md text-on-surface">History Logs</h2>
-<p class="font-body-sm text-body-sm text-on-surface-variant mt-unit">Review and export completed route data.</p>
+<span class="font-body-sm text-body-sm text-on-surface-variant hidden md:inline border-l border-outline-variant pl-3 ml-1">Review and export completed route data.</span>
 </div>
-<div class="flex items-center gap-stack_sm w-full md:w-auto">
+<div class="flex items-center gap-stack_sm">
 <div class="relative flex-1 md:w-64">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" data-icon="search">search</span>
 <input class="w-full bg-[#030712] border border-[#374151] rounded-DEFAULT py-2 pl-9 pr-3 text-on-surface font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Search Route ID..." type="text"/>

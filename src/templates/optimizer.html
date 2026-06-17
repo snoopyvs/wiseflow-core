@@ -7,7 +7,7 @@
 
 
 <!-- Main Content Area -->
-<main class="ml-sidebar_width w-[calc(100%-theme(spacing.sidebar_width))] h-screen flex flex-col">
+<main class="pl-sidebar_width flex-1 w-full h-screen flex flex-col">
 <!-- Header / Toolbar -->
 <header class="h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center px-container_padding shrink-0 z-40">
 <h2 class="font-headline-md text-headline-md text-on-surface">Route Optimization Configuration</h2>
@@ -23,8 +23,8 @@
 <!-- Split Layout Wrapper -->
 <div class="flex-1 flex overflow-hidden">
 <!-- Left Input Panel (35%) -->
-<section class="w-[35%] min-w-[320px] max-w-[480px] border-r border-outline-variant bg-surface-container-low flex flex-col h-full overflow-y-auto z-30">
-<div class="p-container_padding flex flex-col gap-stack_lg">
+<section class="w-[35%] min-w-[320px] max-w-[480px] border-r border-outline-variant bg-surface-container-low flex flex-col h-full z-30">
+<div class="p-container_padding flex flex-col gap-stack_lg flex-1 overflow-y-auto custom-scrollbar">
 <!-- Vehicle Profile -->
 <div class="flex flex-col gap-stack_sm">
 <label class="font-label-caps text-label-caps text-on-surface-variant flex justify-between">
@@ -48,87 +48,72 @@
 <input class="w-full bg-[#030712] border border-outline-variant rounded pl-10 pr-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" type="text" value="Central Hub Depot - Area 4"/>
 </div>
 </div>
-<!-- Destination Checklist -->
+<!-- Destinations -->
 <div class="flex flex-col gap-stack_sm">
-<label class="font-label-caps text-label-caps text-on-surface-variant flex justify-between">
-<span>Destination Checklist</span>
-<span class="text-on-surface-variant">Today's Demand (kg)</span>
+<label class="font-label-caps text-label-caps text-on-surface-variant flex justify-between items-end mb-1">
+<span>Destinations</span>
+<span class="text-[10px] text-on-surface-variant">Demand (kg)</span>
 </label>
-<div class="bg-surface-container border border-outline-variant rounded overflow-hidden">
-<!-- List Item -->
-<div class="flex items-center justify-between p-3 border-b border-outline-variant bg-surface-container-highest border-l-2 !border-l-primary">
-<div class="flex items-center gap-3">
-<input checked="" class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
-<span class="font-body-sm text-on-surface">Sector 7G Facility</span>
+<div class="flex gap-2">
+<input id="new-dest-input" class="flex-1 bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50" placeholder="Enter destination..." type="text"/>
+<input id="new-dest-demand" class="w-24 bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50" placeholder="0 kg" type="number" title="Beban Muatan (kg)"/>
+<button type="button" id="add-dest-btn" class="bg-surface-container-high hover:bg-primary hover:text-[#000000] text-on-surface-variant border border-outline-variant hover:border-primary transition-all duration-200 rounded px-3 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+</button>
 </div>
-<span class="font-data-mono text-data-mono text-secondary">1,250</span>
-</div>
-<!-- List Item -->
-<div class="flex items-center justify-between p-3 border-b border-outline-variant hover:bg-surface-container-high transition-colors">
-<div class="flex items-center gap-3">
-<input checked="" class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
-<span class="font-body-sm text-on-surface">Northway Distribution</span>
-</div>
-<span class="font-data-mono text-data-mono text-on-surface-variant">840</span>
-</div>
-<!-- List Item -->
-<div class="flex items-center justify-between p-3 border-b border-outline-variant hover:bg-surface-container-high transition-colors">
-<div class="flex items-center gap-3">
-<input checked="" class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
-<span class="font-body-sm text-on-surface">East Dock Complex</span>
-</div>
-<span class="font-data-mono text-data-mono text-on-surface-variant">3,100</span>
-</div>
-<!-- List Item -->
-<div class="flex items-center justify-between p-3 hover:bg-surface-container-high transition-colors">
-<div class="flex items-center gap-3">
-<input class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
-<span class="font-body-sm text-on-surface-variant">Westside Retail Park</span>
-</div>
-<span class="font-data-mono text-data-mono text-on-surface-variant">420</span>
+<!-- Destination List -->
+<div class="bg-surface-container border border-outline-variant rounded overflow-hidden mt-2 empty:hidden" id="dest-list">
+<!-- JS will populate this -->
 </div>
 </div>
-</div>
-<!-- Optimization Parameters (Sliders) -->
+<!-- Optimization Mode -->
 <div class="flex flex-col gap-stack_md mt-4">
-<label class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2">Optimization Weights</label>
-<!-- Slider 1 -->
-<div class="flex flex-col gap-2">
-<div class="flex justify-between">
-<span class="font-body-sm text-on-surface">Distance Minimization</span>
-<span class="font-data-mono text-data-mono text-primary">80%</span>
+<label class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2">Mode Operasi</label>
+<div class="grid grid-cols-1 gap-2">
+<!-- Eco Mode -->
+<label class="flex items-center p-3 border border-outline-variant rounded cursor-pointer hover:bg-surface-container-high transition-colors has-[:checked]:border-primary has-[:checked]:bg-[#ffc174]/10 group">
+<input type="radio" name="opt_mode" value="eco" class="hidden" checked>
+<span class="material-symbols-outlined text-secondary mr-3" data-icon="eco">eco</span>
+<div class="flex flex-col flex-1">
+<span class="font-body-md text-on-surface font-bold group-has-[:checked]:text-primary">Eco-Mode</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant normal-case">Hemat BBM, hindari macet</span>
 </div>
-<input max="100" min="1" type="range" value="80"/>
+</label>
+<!-- Express Mode -->
+<label class="flex items-center p-3 border border-outline-variant rounded cursor-pointer hover:bg-surface-container-high transition-colors has-[:checked]:border-primary has-[:checked]:bg-[#ffc174]/10 group">
+<input type="radio" name="opt_mode" value="express" class="hidden">
+<span class="material-symbols-outlined text-error mr-3" data-icon="bolt">bolt</span>
+<div class="flex flex-col flex-1">
+<span class="font-body-md text-on-surface font-bold group-has-[:checked]:text-primary">Express</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant normal-case">Prioritas waktu tempuh</span>
 </div>
-<!-- Slider 2 -->
-<div class="flex flex-col gap-2">
-<div class="flex justify-between">
-<span class="font-body-sm text-on-surface">Fuel Efficiency</span>
-<span class="font-data-mono text-data-mono text-primary">65%</span>
+</label>
+<!-- Balanced Mode -->
+<label class="flex items-center p-3 border border-outline-variant rounded cursor-pointer hover:bg-surface-container-high transition-colors has-[:checked]:border-primary has-[:checked]:bg-[#ffc174]/10 group">
+<input type="radio" name="opt_mode" value="balanced" class="hidden">
+<span class="material-symbols-outlined text-primary mr-3" data-icon="balance">balance</span>
+<div class="flex flex-col flex-1">
+<span class="font-body-md text-on-surface font-bold group-has-[:checked]:text-primary">Balanced</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant normal-case">Seimbang waktu & biaya</span>
 </div>
-<input max="100" min="1" style="background: linear-gradient(to right, #f59e0b 0%, #f59e0b 65%, #374151 65%, #374151 100%);" type="range" value="65"/>
-</div>
-<!-- Slider 3 -->
-<div class="flex flex-col gap-2">
-<div class="flex justify-between">
-<span class="font-body-sm text-on-surface">Capacity Utilization</span>
-<span class="font-data-mono text-data-mono text-primary">95%</span>
-</div>
-<input max="100" min="1" style="background: linear-gradient(to right, #f59e0b 0%, #f59e0b 95%, #374151 95%, #374151 100%);" type="range" value="95"/>
+</label>
 </div>
 </div>
-<div class="mt-auto pt-stack_lg">
-<button class="w-full bg-primary text-[#000000] font-headline-md text-headline-md py-3 rounded hover:bg-primary-fixed-dim transition-colors flex items-center justify-center gap-2 font-bold">
-<span class="material-symbols-outlined" data-icon="route">route</span>
-                            Generate Optimized Sequence
-                        </button>
 </div>
+<div class="p-container_padding border-t border-outline-variant bg-surface-container-low mt-auto flex justify-center">
+<button class="w-auto px-6 bg-gradient-to-r from-primary to-[#f59e0b] text-[#000000] font-label-caps text-label-caps py-2 rounded hover:shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 font-bold group">
+<span class="material-symbols-outlined text-[18px] group-hover:rotate-12 transition-transform" data-icon="route">route</span>
+Generate Optimized Sequence
+</button>
 </div>
 </section>
 <!-- Right Workspace (65%) -->
 <section class="flex-1 flex flex-col relative map-bg">
 <!-- Overlay Summary Box -->
-<div class="absolute top-container_padding right-container_padding bg-[#1F2937] border border-outline-variant rounded p-stack_md w-80 shadow-lg z-20">
+<button type="button" id="toggle-metrics-btn" class="absolute top-container_padding right-container_padding w-10 h-10 bg-surface-container-high border border-outline-variant rounded flex items-center justify-center text-on-surface hover:text-primary transition-colors z-30 shadow-md">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+</button>
+<div id="metrics-panel" class="hidden absolute top-[72px] right-container_padding bg-[#1F2937] border border-outline-variant rounded p-stack_md w-80 shadow-lg z-20">
 <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 border-b border-outline-variant pb-2">Current Sequence Metrics</h3>
 <div class="grid grid-cols-2 gap-4 mb-4">
 <div>
@@ -193,12 +178,12 @@
 <div class="mt-auto bg-surface-container border-t border-outline-variant z-20">
 <div class="p-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
 <span class="font-label-caps text-label-caps text-on-surface-variant">Routing Timeline</span>
-<button class="text-primary font-label-caps text-label-caps flex items-center gap-1 hover:text-primary-fixed transition-colors">
-<span class="material-symbols-outlined text-[16px]" data-icon="open_in_full">open_in_full</span>
-                            EXPAND
-                        </button>
+<button type="button" id="expand-timeline-btn" class="text-primary font-label-caps text-label-caps flex items-center gap-1 hover:text-primary-fixed transition-colors">
+<span id="expand-icon" class="material-symbols-outlined text-[16px]" data-icon="close_fullscreen">close_fullscreen</span>
+<span id="expand-text">COLLAPSE</span>
+</button>
 </div>
-<div class="p-container_padding flex gap-2 overflow-x-auto">
+<div id="timeline-content" class="p-container_padding flex gap-2 overflow-x-auto custom-scrollbar pb-4 transition-all duration-300">
 <!-- Timeline Step: Depot -->
 <div class="flex-shrink-0 w-48 bg-[#030712] border border-outline-variant rounded p-3 relative">
 <div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-on-surface rounded-full"></div>
@@ -242,5 +227,78 @@
 </section>
 </div>
 </main>
+
+<script>
+// Simple JS to handle dynamic destinations
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('new-dest-input');
+    const demandInput = document.getElementById('new-dest-demand');
+    const btn = document.getElementById('add-dest-btn');
+    const list = document.getElementById('dest-list');
+
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const val = input.value.trim();
+        const demand = demandInput.value.trim() || '0';
+        if (val) {
+            const item = document.createElement('div');
+            item.className = 'flex items-center justify-between p-3 border-b border-outline-variant bg-surface-container-highest border-l-2 !border-l-primary animate-fade-in group';
+            item.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+                    <span class="font-body-sm text-on-surface">${val}</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="font-data-mono text-data-mono text-secondary">${demand} kg</span>
+                    <button type="button" class="text-on-surface-variant hover:text-error opacity-0 group-hover:opacity-100 transition-opacity" onclick="this.parentElement.parentElement.remove()">
+                        <span class="material-symbols-outlined text-[16px]">close</span>
+                    </button>
+                </div>
+            `;
+            list.appendChild(item);
+            input.value = '';
+            demandInput.value = '';
+        }
+    });
+
+    // Toggle Metrics Panel
+    const toggleBtn = document.getElementById('toggle-metrics-btn');
+    const metricsPanel = document.getElementById('metrics-panel');
+    if (toggleBtn && metricsPanel) {
+        toggleBtn.addEventListener('click', () => {
+            metricsPanel.classList.toggle('hidden');
+        });
+    }
+
+    // Toggle Timeline Panel
+    const expandBtn = document.getElementById('expand-timeline-btn');
+    const timelineContent = document.getElementById('timeline-content');
+    const expandIcon = document.getElementById('expand-icon');
+    const expandText = document.getElementById('expand-text');
+
+    if (expandBtn && timelineContent) {
+        expandBtn.addEventListener('click', () => {
+            timelineContent.classList.toggle('hidden');
+            if (timelineContent.classList.contains('hidden')) {
+                expandText.textContent = 'EXPAND';
+                expandIcon.textContent = 'open_in_full';
+            } else {
+                expandText.textContent = 'COLLAPSE';
+                expandIcon.textContent = 'close_fullscreen';
+            }
+        });
+    }
+});
+</script>
+
+<style>
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+    animation: fade-in 0.2s ease-out forwards;
+}
+</style>
 
 {% endblock %}

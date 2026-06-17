@@ -11,7 +11,7 @@
     <script src="{{ url_for('static', filename='js/tailwind-config.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="bg-background text-on-background font-body-md h-screen w-screen overflow-hidden flex antialiased selection:bg-primary-container selection:text-on-primary-container">
+<body class="bg-background text-on-background font-body-md h-screen w-full overflow-hidden flex antialiased selection:bg-primary-container selection:text-on-primary-container">
     {% block content %}{% endblock %}
 </body>
 </html>

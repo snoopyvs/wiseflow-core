@@ -19,3 +19,7 @@ ENV/
 # Data caches / IDE files
 .vscode/
 .idea/
+
+# Database
+*.db
+wiseflow.db

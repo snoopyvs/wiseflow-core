@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Core Route Optimizer - WiseFlow{% endblock %}
+
+{% block content %}
+    {% include 'components/sidebar.html' %}
+
+
+<!-- Main Content Area -->
+<main class="ml-sidebar_width w-[calc(100%-theme(spacing.sidebar_width))] h-screen flex flex-col">
+<!-- Header / Toolbar -->
+<header class="h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center px-container_padding shrink-0 z-40">
+<h2 class="font-headline-md text-headline-md text-on-surface">Route Optimization Configuration</h2>
+<div class="flex items-center gap-stack_md">
+<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded font-data-mono text-data-mono text-on-surface-variant">
+                    SESSION ID: 89A-XQ2
+                </span>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant transition-colors border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+</div>
+</header>
+<!-- Split Layout Wrapper -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Input Panel (35%) -->
+<section class="w-[35%] min-w-[320px] max-w-[480px] border-r border-outline-variant bg-surface-container-low flex flex-col h-full overflow-y-auto z-30">
+<div class="p-container_padding flex flex-col gap-stack_lg">
+<!-- Vehicle Profile -->
+<div class="flex flex-col gap-stack_sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant flex justify-between">
+<span>Vehicle Profile</span>
+<span class="text-secondary font-data-mono">FLEET-B</span>
+</label>
+<div class="relative">
+<select class="w-full bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors">
+<option>Medium Transport (8-Ton)</option>
+<option>Heavy Transport (12-Ton)</option>
+<option>Light Courier (2-Ton)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Starting Point -->
+<div class="flex flex-col gap-stack_sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Starting Point</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant" data-icon="location_on">location_on</span>
+<input class="w-full bg-[#030712] border border-outline-variant rounded pl-10 pr-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" type="text" value="Central Hub Depot - Area 4"/>
+</div>
+</div>
+<!-- Destination Checklist -->
+<div class="flex flex-col gap-stack_sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant flex justify-between">
+<span>Destination Checklist</span>
+<span class="text-on-surface-variant">Today's Demand (kg)</span>
+</label>
+<div class="bg-surface-container border border-outline-variant rounded overflow-hidden">
+<!-- List Item -->
+<div class="flex items-center justify-between p-3 border-b border-outline-variant bg-surface-container-highest border-l-2 !border-l-primary">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
+<span class="font-body-sm text-on-surface">Sector 7G Facility</span>
+</div>
+<span class="font-data-mono text-data-mono text-secondary">1,250</span>
+</div>
+<!-- List Item -->
+<div class="flex items-center justify-between p-3 border-b border-outline-variant hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
+<span class="font-body-sm text-on-surface">Northway Distribution</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">840</span>
+</div>
+<!-- List Item -->
+<div class="flex items-center justify-between p-3 border-b border-outline-variant hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-3">
+<input checked="" class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
+<span class="font-body-sm text-on-surface">East Dock Complex</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">3,100</span>
+</div>
+<!-- List Item -->
+<div class="flex items-center justify-between p-3 hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-3">
+<input class="w-4 h-4 rounded border-outline-variant bg-[#030712] text-primary focus:ring-primary focus:ring-offset-surface" type="checkbox"/>
+<span class="font-body-sm text-on-surface-variant">Westside Retail Park</span>
+</div>
+<span class="font-data-mono text-data-mono text-on-surface-variant">420</span>
+</div>
+</div>
+</div>
+<!-- Optimization Parameters (Sliders) -->
+<div class="flex flex-col gap-stack_md mt-4">
+<label class="font-label-caps text-label-caps text-on-surface-variant border-b border-outline-variant pb-2">Optimization Weights</label>
+<!-- Slider 1 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between">
+<span class="font-body-sm text-on-surface">Distance Minimization</span>
+<span class="font-data-mono text-data-mono text-primary">80%</span>
+</div>
+<input max="100" min="1" type="range" value="80"/>
+</div>
+<!-- Slider 2 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between">
+<span class="font-body-sm text-on-surface">Fuel Efficiency</span>
+<span class="font-data-mono text-data-mono text-primary">65%</span>
+</div>
+<input max="100" min="1" style="background: linear-gradient(to right, #f59e0b 0%, #f59e0b 65%, #374151 65%, #374151 100%);" type="range" value="65"/>
+</div>
+<!-- Slider 3 -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between">
+<span class="font-body-sm text-on-surface">Capacity Utilization</span>
+<span class="font-data-mono text-data-mono text-primary">95%</span>
+</div>
+<input max="100" min="1" style="background: linear-gradient(to right, #f59e0b 0%, #f59e0b 95%, #374151 95%, #374151 100%);" type="range" value="95"/>
+</div>
+</div>
+<div class="mt-auto pt-stack_lg">
+<button class="w-full bg-primary text-[#000000] font-headline-md text-headline-md py-3 rounded hover:bg-primary-fixed-dim transition-colors flex items-center justify-center gap-2 font-bold">
+<span class="material-symbols-outlined" data-icon="route">route</span>
+                            Generate Optimized Sequence
+                        </button>
+</div>
+</div>
+</section>
+<!-- Right Workspace (65%) -->
+<section class="flex-1 flex flex-col relative map-bg">
+<!-- Overlay Summary Box -->
+<div class="absolute top-container_padding right-container_padding bg-[#1F2937] border border-outline-variant rounded p-stack_md w-80 shadow-lg z-20">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 border-b border-outline-variant pb-2">Current Sequence Metrics</h3>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Est. Distance</p>
+<p class="font-display-lg text-display-lg text-on-surface">42.8<span class="font-data-mono text-data-mono text-on-surface-variant ml-1">km</span></p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Est. Fuel Cost</p>
+<p class="font-display-lg text-display-lg text-on-surface">145<span class="font-data-mono text-data-mono text-on-surface-variant ml-1">Rp K</span></p>
+</div>
+</div>
+<div class="bg-[#030712] rounded p-3 flex justify-between items-center border border-outline-variant">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Optimization Score</span>
+<div class="flex items-center gap-2">
+<span class="font-data-mono text-data-mono text-secondary">94.2%</span>
+<div class="px-2 py-0.5 rounded bg-[#00a572] bg-opacity-10 border border-[#00a572] border-opacity-30">
+<span class="font-label-caps text-label-caps text-secondary text-[9px]">OPTIMIZED</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Abstract Map Graphic Elements -->
+<div class="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+<!-- Depot Node -->
+<div class="absolute top-[40%] left-[30%] flex items-center justify-center">
+<div class="w-6 h-6 bg-surface-container rounded-full border-2 border-on-surface flex items-center justify-center z-20">
+<div class="w-2 h-2 bg-on-surface rounded-full"></div>
+</div>
+<div class="absolute top-8 bg-[#1F2937] border border-outline-variant px-2 py-1 rounded font-data-mono text-[10px] text-on-surface whitespace-nowrap">DEPOT</div>
+</div>
+<!-- Node 1 -->
+<div class="absolute top-[25%] left-[55%] flex items-center justify-center">
+<div class="w-5 h-5 bg-surface-container rounded-full border-2 border-primary flex items-center justify-center z-20 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+<div class="font-data-mono text-[10px] text-primary">1</div>
+</div>
+</div>
+<!-- Node 2 -->
+<div class="absolute top-[60%] left-[70%] flex items-center justify-center">
+<div class="w-5 h-5 bg-surface-container rounded-full border-2 border-primary flex items-center justify-center z-20 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+<div class="font-data-mono text-[10px] text-primary">2</div>
+</div>
+</div>
+<!-- Node 3 -->
+<div class="absolute top-[75%] left-[45%] flex items-center justify-center">
+<div class="w-5 h-5 bg-surface-container rounded-full border-2 border-primary flex items-center justify-center z-20 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
+<div class="font-data-mono text-[10px] text-primary">3</div>
+</div>
+</div>
+<!-- SVG Path Lines (#10B981 equivalent to primary/secondary green in dark theme) -->
+<svg class="absolute inset-0 w-full h-full" style="z-index: 5;">
+<!-- Depot to 1 -->
+<path class="opacity-80" d="M 30% 40% Q 40% 30% 55% 25%" fill="none" stroke="#00a572" stroke-dasharray="4 4" stroke-width="2"></path>
+<!-- 1 to 2 -->
+<path class="opacity-80" d="M 55% 25% Q 70% 40% 70% 60%" fill="none" stroke="#00a572" stroke-dasharray="4 4" stroke-width="2"></path>
+<!-- 2 to 3 -->
+<path class="opacity-80" d="M 70% 60% Q 60% 70% 45% 75%" fill="none" stroke="#00a572" stroke-dasharray="4 4" stroke-width="2"></path>
+<!-- 3 to Depot -->
+<path class="opacity-50" d="M 45% 75% Q 35% 60% 30% 40%" fill="none" stroke="#374151" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Bottom Timeline Workspace -->
+<div class="mt-auto bg-surface-container border-t border-outline-variant z-20">
+<div class="p-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Routing Timeline</span>
+<button class="text-primary font-label-caps text-label-caps flex items-center gap-1 hover:text-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-[16px]" data-icon="open_in_full">open_in_full</span>
+                            EXPAND
+                        </button>
+</div>
+<div class="p-container_padding flex gap-2 overflow-x-auto">
+<!-- Timeline Step: Depot -->
+<div class="flex-shrink-0 w-48 bg-[#030712] border border-outline-variant rounded p-3 relative">
+<div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-on-surface rounded-full"></div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">START</p>
+<p class="font-body-md text-on-surface font-bold truncate">Central Hub</p>
+<div class="mt-2 flex justify-between items-end">
+<span class="font-data-mono text-data-mono text-on-surface-variant">08:00 AM</span>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="warehouse">warehouse</span>
+</div>
+</div>
+<div class="flex-shrink-0 flex flex-col justify-center px-2">
+<span class="font-data-mono text-[10px] text-secondary mb-1">12km</span>
+<div class="w-8 h-px bg-[#00a572]"></div>
+</div>
+<!-- Timeline Step: 1 -->
+<div class="flex-shrink-0 w-48 bg-[#1F2937] border border-primary rounded p-3 relative">
+<div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-primary rounded-full"></div>
+<p class="font-label-caps text-label-caps text-primary mb-1">STOP 01</p>
+<p class="font-body-md text-on-surface font-bold truncate">Sector 7G Facility</p>
+<div class="mt-2 flex justify-between items-end">
+<span class="font-data-mono text-data-mono text-on-surface-variant">08:45 AM</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant border border-outline-variant px-1 rounded">-1,250kg</span>
+</div>
+</div>
+<div class="flex-shrink-0 flex flex-col justify-center px-2">
+<span class="font-data-mono text-[10px] text-secondary mb-1">18km</span>
+<div class="w-8 h-px bg-[#00a572]"></div>
+</div>
+<!-- Timeline Step: 2 -->
+<div class="flex-shrink-0 w-48 bg-[#1F2937] border border-outline-variant rounded p-3 relative opacity-70">
+<div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-outline-variant rounded-full"></div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">STOP 02</p>
+<p class="font-body-md text-on-surface font-bold truncate">East Dock Complex</p>
+<div class="mt-2 flex justify-between items-end">
+<span class="font-data-mono text-data-mono text-on-surface-variant">09:30 AM</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant border border-outline-variant px-1 rounded">-3,100kg</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+
+{% endblock %}

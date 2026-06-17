@@ -1,11 +1,39 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    # Ini adalah route utama yang akan menampilkan halaman dashboard/map
-    return render_template('index.html')
+    # Redirect ke dashboard secara default
+    return redirect(url_for('dashboard'))
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/register')
+def register():
+    return render_template('register.html')
+
+@app.route('/master-data')
+def master_data():
+    return render_template('master_data.html')
+
+@app.route('/optimizer')
+def optimizer():
+    return render_template('optimizer.html')
+
+@app.route('/history')
+def history():
+    return render_template('history.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
 
 if __name__ == '__main__':
     # Menjalankan server Flask dalam mode debug

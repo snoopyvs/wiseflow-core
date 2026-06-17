@@ -1,6 +1,17 @@
+import os
 from flask import Flask, render_template, redirect, url_for
+from src.extensions import db
+from src.models import Partner, Vehicle, RouteHistory
 
 app = Flask(__name__)
+
+# Configure Database
+basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'wiseflow.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize extensions
+db.init_app(app)
 
 @app.route('/')
 def index():

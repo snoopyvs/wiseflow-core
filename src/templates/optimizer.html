@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Core Route Optimizer - WiseFlow{% endblock %}
+{% block title %}WiseFlow - Optimizer Configuration{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+{% endblock %}
 
 {% block content %}
     {% include 'components/sidebar.html' %}
@@ -15,7 +20,7 @@
 <span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded font-data-mono text-data-mono text-on-surface-variant">
                     SESSION ID: 89A-XQ2
                 </span>
-<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant transition-colors border border-transparent hover:border-outline-variant">
+<button onclick="location.reload()" class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant transition-colors border border-transparent hover:border-outline-variant">
 <span class="material-symbols-outlined" data-icon="refresh">refresh</span>
 </button>
 </div>
@@ -43,9 +48,10 @@
 <!-- Starting Point -->
 <div class="flex flex-col gap-stack_sm">
 <label class="font-label-caps text-label-caps text-on-surface-variant">Starting Point</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant" data-icon="location_on">location_on</span>
-<input class="w-full bg-[#030712] border border-outline-variant rounded pl-10 pr-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" type="text" value="Central Hub Depot - Area 4"/>
+<div class="relative" id="start-autocomplete-wrapper">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant z-10" data-icon="my_location">my_location</span>
+<input id="start-point-input" class="w-full bg-[#030712] border border-outline-variant rounded pl-10 pr-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50" type="text" placeholder="Search starting location..." autocomplete="off"/>
+<div id="start-dropdown" class="autocomplete-dropdown hidden"></div>
 </div>
 </div>
 <!-- Destinations -->
@@ -55,7 +61,10 @@
 <span class="text-[10px] text-on-surface-variant">Demand (kg)</span>
 </label>
 <div class="flex gap-2">
-<input id="new-dest-input" class="flex-1 bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50" placeholder="Enter destination..." type="text"/>
+<div class="relative flex-1" id="dest-autocomplete-wrapper">
+<input id="new-dest-input" class="w-full bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50" placeholder="Search destination..." type="text" autocomplete="off"/>
+<div id="dest-dropdown" class="autocomplete-dropdown hidden"></div>
+</div>
 <input id="new-dest-demand" class="w-24 bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors placeholder:text-on-surface-variant/50" placeholder="0 kg" type="number" title="Beban Muatan (kg)"/>
 <button type="button" id="add-dest-btn" class="bg-surface-container-high hover:bg-primary hover:text-[#000000] text-on-surface-variant border border-outline-variant hover:border-primary transition-all duration-200 rounded px-3 flex items-center justify-center">
 <span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
@@ -101,9 +110,9 @@
 </div>
 </div>
 <div class="p-container_padding border-t border-outline-variant bg-surface-container-low mt-auto flex justify-center">
-<button class="w-auto px-6 bg-gradient-to-r from-primary to-[#f59e0b] text-[#000000] font-label-caps text-label-caps py-2 rounded hover:shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 font-bold group">
+<button id="generate-btn" class="w-auto px-6 bg-gradient-to-r from-primary to-[#f59e0b] text-[#000000] font-label-caps text-label-caps py-2 rounded hover:shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-2 font-bold group">
 <span class="material-symbols-outlined text-[18px] group-hover:rotate-12 transition-transform" data-icon="route">route</span>
-Generate Optimized Sequence
+<span id="generate-btn-text">Generate Optimized Sequence</span>
 </button>
 </div>
 </section>
@@ -114,66 +123,39 @@ Generate Optimized Sequence
 <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
 </button>
 <div id="metrics-panel" class="hidden absolute top-[72px] right-container_padding bg-[#1F2937] border border-outline-variant rounded p-stack_md w-80 shadow-lg z-20">
-<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 border-b border-outline-variant pb-2">Current Sequence Metrics</h3>
-<div class="grid grid-cols-2 gap-4 mb-4">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4 border-b border-outline-variant pb-2">Optimization Comparison</h3>
+<div class="grid grid-cols-2 gap-4 mb-3">
 <div>
-<p class="font-label-caps text-label-caps text-on-surface-variant">Est. Distance</p>
-<p class="font-display-lg text-display-lg text-on-surface">42.8<span class="font-data-mono text-data-mono text-on-surface-variant ml-1">km</span></p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">A* Nodes</p>
+<p class="font-display-lg text-display-lg text-primary" id="metric-astar-nodes">-</p>
 </div>
 <div>
-<p class="font-label-caps text-label-caps text-on-surface-variant">Est. Fuel Cost</p>
-<p class="font-display-lg text-display-lg text-on-surface">145<span class="font-data-mono text-data-mono text-on-surface-variant ml-1">Rp K</span></p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Dijkstra Nodes</p>
+<p class="font-display-lg text-display-lg text-on-surface" id="metric-dijkstra-nodes">-</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">A* Time</p>
+<p class="font-display-lg text-display-lg text-primary"><span id="metric-astar-time">-</span><span class="font-data-mono text-data-mono text-on-surface-variant ml-1">ms</span></p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Dijkstra Time</p>
+<p class="font-display-lg text-display-lg text-on-surface"><span id="metric-dijkstra-time">-</span><span class="font-data-mono text-data-mono text-on-surface-variant ml-1">ms</span></p>
 </div>
 </div>
 <div class="bg-[#030712] rounded p-3 flex justify-between items-center border border-outline-variant">
-<span class="font-label-caps text-label-caps text-on-surface-variant">Optimization Score</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Total Route</span>
 <div class="flex items-center gap-2">
-<span class="font-data-mono text-data-mono text-secondary">94.2%</span>
+<span class="font-data-mono text-data-mono text-secondary"><span id="metric-distance">-</span> km</span>
 <div class="px-2 py-0.5 rounded bg-[#00a572] bg-opacity-10 border border-[#00a572] border-opacity-30">
-<span class="font-label-caps text-label-caps text-secondary text-[9px]">OPTIMIZED</span>
+<span class="font-label-caps text-label-caps text-secondary text-[9px]" id="metric-fuel">- L</span>
 </div>
 </div>
 </div>
 </div>
-<!-- Abstract Map Graphic Elements -->
-<div class="absolute inset-0 pointer-events-none z-10 overflow-hidden">
-<!-- Depot Node -->
-<div class="absolute top-[40%] left-[30%] flex items-center justify-center">
-<div class="w-6 h-6 bg-surface-container rounded-full border-2 border-on-surface flex items-center justify-center z-20">
-<div class="w-2 h-2 bg-on-surface rounded-full"></div>
-</div>
-<div class="absolute top-8 bg-[#1F2937] border border-outline-variant px-2 py-1 rounded font-data-mono text-[10px] text-on-surface whitespace-nowrap">DEPOT</div>
-</div>
-<!-- Node 1 -->
-<div class="absolute top-[25%] left-[55%] flex items-center justify-center">
-<div class="w-5 h-5 bg-surface-container rounded-full border-2 border-primary flex items-center justify-center z-20 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
-<div class="font-data-mono text-[10px] text-primary">1</div>
-</div>
-</div>
-<!-- Node 2 -->
-<div class="absolute top-[60%] left-[70%] flex items-center justify-center">
-<div class="w-5 h-5 bg-surface-container rounded-full border-2 border-primary flex items-center justify-center z-20 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
-<div class="font-data-mono text-[10px] text-primary">2</div>
-</div>
-</div>
-<!-- Node 3 -->
-<div class="absolute top-[75%] left-[45%] flex items-center justify-center">
-<div class="w-5 h-5 bg-surface-container rounded-full border-2 border-primary flex items-center justify-center z-20 shadow-[0_0_10px_rgba(245,158,11,0.5)]">
-<div class="font-data-mono text-[10px] text-primary">3</div>
-</div>
-</div>
-<!-- SVG Path Lines (#10B981 equivalent to primary/secondary green in dark theme) -->
-<svg class="absolute inset-0 w-full h-full" style="z-index: 5;">
-<!-- Depot to 1 -->
-<path class="opacity-80" d="M 30% 40% Q 40% 30% 55% 25%" fill="none" stroke="#00a572" stroke-dasharray="4 4" stroke-width="2"></path>
-<!-- 1 to 2 -->
-<path class="opacity-80" d="M 55% 25% Q 70% 40% 70% 60%" fill="none" stroke="#00a572" stroke-dasharray="4 4" stroke-width="2"></path>
-<!-- 2 to 3 -->
-<path class="opacity-80" d="M 70% 60% Q 60% 70% 45% 75%" fill="none" stroke="#00a572" stroke-dasharray="4 4" stroke-width="2"></path>
-<!-- 3 to Depot -->
-<path class="opacity-50" d="M 45% 75% Q 35% 60% 30% 40%" fill="none" stroke="#374151" stroke-width="2"></path>
-</svg>
-</div>
+<!-- Real Map Container -->
+<div id="map" class="absolute inset-0 z-0"></div>
 <!-- Bottom Timeline Workspace -->
 <div class="mt-auto bg-surface-container border-t border-outline-variant z-20">
 <div class="p-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
@@ -184,44 +166,7 @@ Generate Optimized Sequence
 </button>
 </div>
 <div id="timeline-content" class="p-container_padding flex gap-2 overflow-x-auto custom-scrollbar pb-4 transition-all duration-300">
-<!-- Timeline Step: Depot -->
-<div class="flex-shrink-0 w-48 bg-[#030712] border border-outline-variant rounded p-3 relative">
-<div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-on-surface rounded-full"></div>
-<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">START</p>
-<p class="font-body-md text-on-surface font-bold truncate">Central Hub</p>
-<div class="mt-2 flex justify-between items-end">
-<span class="font-data-mono text-data-mono text-on-surface-variant">08:00 AM</span>
-<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="warehouse">warehouse</span>
-</div>
-</div>
-<div class="flex-shrink-0 flex flex-col justify-center px-2">
-<span class="font-data-mono text-[10px] text-secondary mb-1">12km</span>
-<div class="w-8 h-px bg-[#00a572]"></div>
-</div>
-<!-- Timeline Step: 1 -->
-<div class="flex-shrink-0 w-48 bg-[#1F2937] border border-primary rounded p-3 relative">
-<div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-primary rounded-full"></div>
-<p class="font-label-caps text-label-caps text-primary mb-1">STOP 01</p>
-<p class="font-body-md text-on-surface font-bold truncate">Sector 7G Facility</p>
-<div class="mt-2 flex justify-between items-end">
-<span class="font-data-mono text-data-mono text-on-surface-variant">08:45 AM</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant border border-outline-variant px-1 rounded">-1,250kg</span>
-</div>
-</div>
-<div class="flex-shrink-0 flex flex-col justify-center px-2">
-<span class="font-data-mono text-[10px] text-secondary mb-1">18km</span>
-<div class="w-8 h-px bg-[#00a572]"></div>
-</div>
-<!-- Timeline Step: 2 -->
-<div class="flex-shrink-0 w-48 bg-[#1F2937] border border-outline-variant rounded p-3 relative opacity-70">
-<div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-outline-variant rounded-full"></div>
-<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">STOP 02</p>
-<p class="font-body-md text-on-surface font-bold truncate">East Dock Complex</p>
-<div class="mt-2 flex justify-between items-end">
-<span class="font-data-mono text-data-mono text-on-surface-variant">09:30 AM</span>
-<span class="font-data-mono text-data-mono text-on-surface-variant border border-outline-variant px-1 rounded">-3,100kg</span>
-</div>
-</div>
+<!-- Dynamic content will be injected here after optimization -->
 </div>
 </div>
 </section>
@@ -229,39 +174,244 @@ Generate Optimized Sequence
 </main>
 
 <script>
-// Simple JS to handle dynamic destinations
+// =============================================
+// LEAFLET MAP + NOMINATIM AUTOCOMPLETE ENGINE
+// =============================================
+let map;
+let markers = [];
+let routeLines = [];
+let startMarker = null;
+
+// Starting point data (will be set by autocomplete)
+let startPoint = null;
+// Destination list (array of location objects)
+let destinations = [];
+
+// Bounding box for Pulau Jawa: [south, west, north, east]
+const JAVA_BOUNDS = [[-8.8, 105.0], [-5.8, 114.6]];
+// Nominatim viewbox param: west,south,east,north
+const NOMINATIM_VIEWBOX = '105.0,-8.8,114.6,-5.8';
+
+// Debounce utility: wait N ms after user stops typing before firing
+function debounce(fn, delay) {
+    let timer;
+    return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+}
+
+// Fetch suggestions from Nominatim API (locked to Java, Indonesia)
+async function fetchSuggestions(query) {
+    if (query.length < 2) return [];
+    const url = `https://nominatim.openstreetmap.org/search?` +
+        `q=${encodeURIComponent(query)}` +
+        `&format=json&addressdetails=1&limit=6` +
+        `&countrycodes=id` +
+        `&viewbox=${NOMINATIM_VIEWBOX}&bounded=1`;
+    try {
+        const res = await fetch(url, {
+            headers: { 'Accept-Language': 'id,en' }
+        });
+        return await res.json();
+    } catch (e) {
+        console.error('Nominatim fetch error:', e);
+        return [];
+    }
+}
+
+// Render dropdown items
+function renderDropdown(dropdownEl, results, onSelect) {
+    dropdownEl.innerHTML = '';
+    if (results.length === 0) {
+        dropdownEl.classList.add('hidden');
+        return;
+    }
+    results.forEach(place => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.innerHTML = `
+            <span class="material-symbols-outlined text-primary text-[16px] shrink-0">location_on</span>
+            <div class="flex flex-col overflow-hidden">
+                <span class="text-on-surface font-body-sm truncate">${place.display_name.split(',')[0]}</span>
+                <span class="text-on-surface-variant text-[10px] truncate">${place.display_name}</span>
+            </div>
+        `;
+        item.addEventListener('click', () => {
+            onSelect(place);
+            dropdownEl.classList.add('hidden');
+        });
+        dropdownEl.appendChild(item);
+    });
+    dropdownEl.classList.remove('hidden');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('new-dest-input');
+    // ===== 1. SETUP MAP =====
+    map = L.map('map', {
+        zoomControl: false,
+        maxBounds: JAVA_BOUNDS,
+        maxBoundsViscosity: 1.0
+    }).setView([-7.25, 110.0], 8); // Center of Java
+
+    L.control.zoom({ position: 'topleft' }).addTo(map);
+
+    // Colorful Dark Mode: Standard OSM tiles + CSS invert trick
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+        className: 'dark-map-tiles' // CSS class applies invert filter
+    }).addTo(map);
+
+    // ===== 2. STARTING POINT AUTOCOMPLETE =====
+    const startInput = document.getElementById('start-point-input');
+    const startDropdown = document.getElementById('start-dropdown');
+
+    startInput.addEventListener('input', debounce(async () => {
+        const q = startInput.value.trim();
+        const results = await fetchSuggestions(q);
+        renderDropdown(startDropdown, results, (place) => {
+            // Set input value
+            startInput.value = place.display_name.split(',')[0];
+            const lat = parseFloat(place.lat);
+            const lng = parseFloat(place.lon);
+
+            startPoint = { lat, lng, name: place.display_name.split(',')[0] };
+
+            // Remove old start marker
+            if (startMarker) map.removeLayer(startMarker);
+            // Add new start marker (white depot style)
+            const depotIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div style="width:28px;height:28px;background:#111827;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(255,255,255,0.3);"><div style="width:8px;height:8px;background:#fff;border-radius:50%;"></div></div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+            startMarker = L.marker([lat, lng], { icon: depotIcon }).addTo(map)
+                .bindPopup(`<b>START</b><br>${startPoint.name}`);
+
+            // Fly to location
+            map.flyTo([lat, lng], 14, { duration: 1.2 });
+        });
+    }, 300));
+
+    // ===== 3. DESTINATION AUTOCOMPLETE =====
+    const destInput = document.getElementById('new-dest-input');
+    const destDropdown = document.getElementById('dest-dropdown');
     const demandInput = document.getElementById('new-dest-demand');
-    const btn = document.getElementById('add-dest-btn');
+    const addBtn = document.getElementById('add-dest-btn');
     const list = document.getElementById('dest-list');
 
-    btn.addEventListener('click', (e) => {
+    // Store selected coordinates temporarily
+    let pendingDest = null;
+
+    destInput.addEventListener('input', debounce(async () => {
+        pendingDest = null; // Reset pending on new typing
+        const q = destInput.value.trim();
+        const results = await fetchSuggestions(q);
+        renderDropdown(destDropdown, results, (place) => {
+            destInput.value = place.display_name.split(',')[0];
+            pendingDest = {
+                lat: parseFloat(place.lat),
+                lng: parseFloat(place.lon),
+                name: place.display_name.split(',')[0],
+                fullName: place.display_name
+            };
+            // Fly to selected location
+            map.flyTo([pendingDest.lat, pendingDest.lng], 15, { duration: 1.2 });
+        });
+    }, 300));
+
+    // Add button: only add if a location was selected from dropdown
+    addBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const val = input.value.trim();
+        if (!pendingDest) {
+            // Flash input border red to indicate no valid selection
+            destInput.style.borderColor = '#ef4444';
+            setTimeout(() => { destInput.style.borderColor = ''; }, 1000);
+            return;
+        }
         const demand = demandInput.value.trim() || '0';
-        if (val) {
-            const item = document.createElement('div');
-            item.className = 'flex items-center justify-between p-3 border-b border-outline-variant bg-surface-container-highest border-l-2 !border-l-primary animate-fade-in group';
-            item.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
-                    <span class="font-body-sm text-on-surface">${val}</span>
+        addDestinationToUI(pendingDest.name, pendingDest.lat, pendingDest.lng, demand);
+        destInput.value = '';
+        demandInput.value = '';
+        pendingDest = null;
+    });
+
+    function addDestinationToUI(name, lat, lng, demand) {
+        const id = 'dest-' + Date.now();
+        destinations.push({ id, lat, lng, name, demand: parseFloat(demand) });
+
+        // Add numbered marker to map
+        const num = destinations.length;
+        const destIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="width:22px;height:22px;background:#111827;border-radius:50%;border:2px solid #f59e0b;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(245,158,11,0.5);font-family:'JetBrains Mono',monospace;font-size:10px;color:#f59e0b;">${num}</div>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+        });
+        const marker = L.marker([lat, lng], { icon: destIcon }).addTo(map).bindPopup(name);
+        markers.push(marker);
+
+        // Add to destination list in DOM
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-3 border-b border-outline-variant bg-surface-container-highest border-l-2 !border-l-primary animate-fade-in group';
+        item.id = id;
+        item.innerHTML = `
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
+                <div class="flex flex-col">
+                    <span class="font-body-sm text-on-surface">${name}</span>
+                    <span class="font-data-mono text-[9px] text-on-surface-variant">Lat: ${lat.toFixed(4)}, Lon: ${lng.toFixed(4)}</span>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="font-data-mono text-data-mono text-secondary">${demand} kg</span>
-                    <button type="button" class="text-on-surface-variant hover:text-error opacity-0 group-hover:opacity-100 transition-opacity" onclick="this.parentElement.parentElement.remove()">
-                        <span class="material-symbols-outlined text-[16px]">close</span>
-                    </button>
-                </div>
-            `;
-            list.appendChild(item);
-            input.value = '';
-            demandInput.value = '';
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="font-data-mono text-data-mono text-on-surface-variant bg-surface-container px-2 py-1 rounded border border-outline-variant">${demand}kg</span>
+                <button class="text-on-surface-variant hover:text-error transition-colors opacity-0 group-hover:opacity-100 p-1 rounded" onclick="removeDestination('${id}')">
+                    <span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span>
+                </button>
+            </div>
+        `;
+        list.appendChild(item);
+    }
+
+    // Global remove function
+    window.removeDestination = function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.remove();
+            const idx = destinations.findIndex(d => d.id === id);
+            if (idx >= 0) {
+                map.removeLayer(markers[idx]);
+                markers.splice(idx, 1);
+                destinations.splice(idx, 1);
+                
+                // Re-render remaining markers with updated numbers
+                markers.forEach((marker, i) => {
+                    const num = i + 1;
+                    const destIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="width:22px;height:22px;background:#111827;border-radius:50%;border:2px solid #f59e0b;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(245,158,11,0.5);font-family:'JetBrains Mono',monospace;font-size:10px;color:#f59e0b;">${num}</div>`,
+                        iconSize: [22, 22],
+                        iconAnchor: [11, 11]
+                    });
+                    marker.setIcon(destIcon);
+                });
+            }
+        }
+    };
+
+    // ===== 4. CLOSE DROPDOWNS ON OUTSIDE CLICK =====
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('start-autocomplete-wrapper').contains(e.target)) {
+            startDropdown.classList.add('hidden');
+        }
+        if (!document.getElementById('dest-autocomplete-wrapper').contains(e.target)) {
+            destDropdown.classList.add('hidden');
         }
     });
 
-    // Toggle Metrics Panel
+    // ===== 5. TOGGLE METRICS PANEL =====
     const toggleBtn = document.getElementById('toggle-metrics-btn');
     const metricsPanel = document.getElementById('metrics-panel');
     if (toggleBtn && metricsPanel) {
@@ -270,12 +420,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle Timeline Panel
+    // ===== 6. TOGGLE TIMELINE PANEL =====
     const expandBtn = document.getElementById('expand-timeline-btn');
     const timelineContent = document.getElementById('timeline-content');
     const expandIcon = document.getElementById('expand-icon');
     const expandText = document.getElementById('expand-text');
-
     if (expandBtn && timelineContent) {
         expandBtn.addEventListener('click', () => {
             timelineContent.classList.toggle('hidden');
@@ -288,10 +437,185 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ===== 7. API INTEGRATION & ROUTE GENERATION =====
+    const generateBtn = document.getElementById('generate-btn');
+    const generateBtnText = document.getElementById('generate-btn-text');
+
+    if (generateBtn) {
+        generateBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (!startPoint || destinations.length === 0) {
+                alert("Please set a Starting Point and at least one Destination.");
+                return;
+            }
+
+            // Get selected optimization mode
+            const optModeRadio = document.querySelector('input[name="opt_mode"]:checked');
+            const mode = optModeRadio ? optModeRadio.value : 'balanced';
+
+            // Show loading state
+            generateBtn.disabled = true;
+            generateBtnText.textContent = 'Calculating Routes...';
+            generateBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            try {
+                const response = await fetch('/api/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        start_point: startPoint,
+                        destinations: destinations,
+                        mode: mode
+                    })
+                });
+
+                if (!response.ok) throw new Error("Optimization failed");
+                const data = await response.json();
+
+                // 1. Update Metrics UI
+                document.getElementById('metric-astar-nodes').textContent = data.astar.nodes_expanded;
+                document.getElementById('metric-dijkstra-nodes').textContent = data.dijkstra.nodes_expanded;
+                document.getElementById('metric-astar-time').textContent = data.astar.execution_time_ms;
+                document.getElementById('metric-dijkstra-time').textContent = data.dijkstra.execution_time_ms;
+                document.getElementById('metric-distance').textContent = data.astar.total_distance_km;
+                
+                // Mock fuel in Liters (Assuming 10 km per Liter)
+                const fuelLiters = (data.astar.total_distance_km / 10).toFixed(1);
+                document.getElementById('metric-fuel').textContent = `${fuelLiters} L`;
+
+                // Show metrics panel automatically
+                if (metricsPanel) metricsPanel.classList.remove('hidden');
+
+                // 2. Draw Route on Map
+                // Clear existing lines
+                routeLines.forEach(line => map.removeLayer(line));
+                routeLines = [];
+
+                const latlngs = data.astar.route_locations.map(loc => [loc.lat, loc.lng]);
+                
+                // Draw A* path (Green/Gold gradient simulation)
+                const polyline = L.polyline(latlngs, {
+                    color: '#f59e0b',
+                    weight: 4,
+                    opacity: 0.8,
+                    dashArray: '10, 10',
+                    lineJoin: 'round'
+                }).addTo(map);
+                routeLines.push(polyline);
+
+                // 3. Zoom Map to Fit Route (The user's requested feature)
+                // Get bounds of the drawn polyline
+                const routeBounds = polyline.getBounds();
+                
+                // Ensure starting point is also in bounds (just in case)
+                routeBounds.extend([startPoint.lat, startPoint.lng]);
+                
+                map.fitBounds(routeBounds, {
+                    padding: [50, 50],
+                    duration: 1.0,
+                    animate: true
+                });
+
+                // 4. Build Dynamic Timeline
+                const timelineContainer = document.getElementById('timeline-content');
+                if (timelineContainer) {
+                    timelineContainer.innerHTML = '';
+                    let currentTime = new Date();
+                    currentTime.setHours(8, 0, 0, 0); // Mock start at 08:00 AM
+
+                    data.astar.route_locations.forEach((loc, index) => {
+                        const isStart = index === 0;
+                        const isLast = index === data.astar.route_locations.length - 1;
+                        
+                        const timeStr = currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        
+                        const nodeEl = document.createElement('div');
+                        nodeEl.className = `flex-shrink-0 w-48 border rounded p-3 relative ${isStart ? 'bg-[#030712] border-outline-variant' : 'bg-[#1F2937] border-primary'}`;
+                        nodeEl.innerHTML = `
+                            <div class="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full ${isStart ? 'bg-on-surface' : 'bg-primary'}"></div>
+                            <p class="font-label-caps text-label-caps mb-1 ${isStart ? 'text-on-surface-variant' : 'text-primary'}">${isStart ? 'START' : `STOP 0${index}`}</p>
+                            <p class="font-body-md text-on-surface font-bold truncate" title="${loc.name}">${loc.name}</p>
+                            <div class="mt-2 flex justify-between items-end">
+                                <span class="font-data-mono text-data-mono text-on-surface-variant">${timeStr}</span>
+                                ${isStart ? '<span class="material-symbols-outlined text-on-surface-variant text-[16px]">warehouse</span>' : `<span class="font-data-mono text-data-mono text-on-surface-variant border border-outline-variant px-1 rounded">${loc.demand || 0}kg</span>`}
+                            </div>
+                        `;
+                        timelineContainer.appendChild(nodeEl);
+                        
+                        if (!isLast) {
+                            const nextLoc = data.astar.route_locations[index + 1];
+                            const distMeters = map.distance([loc.lat, loc.lng], [nextLoc.lat, nextLoc.lng]);
+                            const distKm = (distMeters / 1000).toFixed(1);
+                            
+                            // Mock time: roughly 3 mins per km + 10 mins loading/unloading
+                            currentTime.setMinutes(currentTime.getMinutes() + Math.round(distKm * 3) + 10);
+                            
+                            const lineEl = document.createElement('div');
+                            lineEl.className = "flex-shrink-0 flex flex-col justify-center px-2";
+                            lineEl.innerHTML = `
+                                <span class="font-data-mono text-[10px] text-secondary mb-1">${distKm}km</span>
+                                <div class="w-8 h-px bg-[#00a572] relative">
+                                    <div class="absolute right-0 -top-1 w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-[#00a572] border-b-[4px] border-b-transparent"></div>
+                                </div>
+                            `;
+                            timelineContainer.appendChild(lineEl);
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to generate optimized sequence.");
+            } finally {
+                // Restore button state
+                generateBtn.disabled = false;
+                generateBtnText.textContent = 'Generate Optimized Sequence';
+                generateBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        });
+    }
 });
 </script>
 
 <style>
+/* Colorful Dark Mode for OSM tiles: invert + hue-rotate preserves color info */
+.dark-map-tiles {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+
+/* Autocomplete dropdown styling */
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: #111827;
+    border: 1px solid #374151;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.autocomplete-item:hover {
+    background: #1f2937;
+}
+.autocomplete-item:not(:last-child) {
+    border-bottom: 1px solid #1f2937;
+}
+
+/* Fade-in animation */
 @keyframes fade-in {
     from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }

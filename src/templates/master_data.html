@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Master Data Hub - WiseFlow{% endblock %}
+
+{% block content %}
+    {% include 'components/sidebar.html' %}
+
+
+<!-- Main Content Area -->
+<div class="flex flex-col w-full md:ml-sidebar_width min-h-screen">
+<!-- TopNavBar -->
+<header class="hidden md:flex justify-between items-center px-container_padding docked full-width top-0 h-14 border-b border-outline-variant bg-surface z-10 sticky top-0">
+<div class="flex items-center gap-3">
+<h2 class="font-headline-md text-headline-md text-on-surface">Data Hub</h2>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:bg-surface-container-lowest transition-all hover:scale-95 hover:opacity-80 p-2 rounded">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+</button>
+<button class="hover:bg-surface-container-lowest transition-all hover:scale-95 hover:opacity-80 p-2 rounded">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="hover:bg-surface-container-lowest transition-all hover:scale-95 hover:opacity-80 p-2 rounded">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 p-container_padding md:p-stack_lg flex flex-col gap-stack_lg">
+<!-- Tab Controls -->
+<div class="flex border-b border-outline-variant">
+<button class="px-4 py-2 font-label-caps text-label-caps text-primary border-b-2 border-primary" id="tab-fleet">
+                    Fleet Registry
+                </button>
+<button class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors" id="tab-locations">
+                    Location Address Book
+                </button>
+</div>
+<!-- Tab A: Fleet Registry -->
+<div class="flex flex-col gap-stack_md" id="content-fleet">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md text-on-surface">Active Fleet</h3>
+<button class="bg-primary text-on-primary font-bold px-4 py-2 rounded text-sm hover:bg-surface-tint transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="add" style="font-size: 18px;">add</span>
+                        Add Truck
+                    </button>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded p-4">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant text-on-surface-variant">
+<th class="py-2 px-2 font-label-caps text-label-caps">Plate</th>
+<th class="py-2 px-2 font-label-caps text-label-caps">Model</th>
+<th class="py-2 px-2 font-label-caps text-label-caps">Capacity kg</th>
+<th class="py-2 px-2 font-label-caps text-label-caps">Fuel km/L</th>
+<th class="py-2 px-2 font-label-caps text-label-caps text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-surface">
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
+<td class="py-1 px-2 border-l-2 border-primary pl-[6px]">AX-7729</td>
+<td class="py-1 px-2">Volvo FH16</td>
+<td class="py-1 px-2">24000</td>
+<td class="py-1 px-2">3.2</td>
+<td class="py-1 px-2 text-right">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
+<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">BR-9011</td>
+<td class="py-1 px-2">Scania R500</td>
+<td class="py-1 px-2">22000</td>
+<td class="py-1 px-2">3.5</td>
+<td class="py-1 px-2 text-right">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
+<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">CZ-4432</td>
+<td class="py-1 px-2">Mercedes Actros</td>
+<td class="py-1 px-2">26000</td>
+<td class="py-1 px-2">2.9</td>
+<td class="py-1 px-2 text-right">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors h-[32px]">
+<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">DK-1188</td>
+<td class="py-1 px-2">Volvo FH</td>
+<td class="py-1 px-2">24000</td>
+<td class="py-1 px-2">3.3</td>
+<td class="py-1 px-2 text-right">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Tab B: Location Address Book (Initially Hidden for demo, but generated) -->
+<div class="hidden flex flex-col gap-stack_md" id="content-locations">
+<div class="flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md text-on-surface">Destination Network</h3>
+<button class="bg-primary text-on-primary font-bold px-4 py-2 rounded text-sm hover:bg-surface-tint transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="add_location" style="font-size: 18px;">add_location</span>
+                        Add New Destination
+                    </button>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded p-4">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant text-on-surface-variant">
+<th class="py-2 px-2 font-label-caps text-label-caps">ID</th>
+<th class="py-2 px-2 font-label-caps text-label-caps">Name</th>
+<th class="py-2 px-2 font-label-caps text-label-caps">Lat/Lon</th>
+<th class="py-2 px-2 font-label-caps text-label-caps">Demand kg</th>
+<th class="py-2 px-2 font-label-caps text-label-caps text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-data-mono text-data-mono text-on-surface">
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
+<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">LOC-001</td>
+<td class="py-1 px-2">North Hub</td>
+<td class="py-1 px-2">51.5074, -0.1278</td>
+<td class="py-1 px-2 text-secondary">4500</td>
+<td class="py-1 px-2 text-right">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
+<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">LOC-002</td>
+<td class="py-1 px-2">East Depot</td>
+<td class="py-1 px-2">51.5200, -0.0500</td>
+<td class="py-1 px-2">1200</td>
+<td class="py-1 px-2 text-right">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors h-[32px]">
+<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">LOC-003</td>
+<td class="py-1 px-2">South Terminal</td>
+<td class="py-1 px-2">51.4800, -0.1000</td>
+<td class="py-1 px-2 text-primary">8000</td>
+<td class="py-1 px-2 text-right">
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+        // Simple tab switching logic
+        const tabFleetBtn = document.getElementById('tab-fleet');
+        const tabLocBtn = document.getElementById('tab-locations');
+        const contentFleet = document.getElementById('content-fleet');
+        const contentLoc = document.getElementById('content-locations');
+
+        tabFleetBtn.addEventListener('click', () => {
+            tabFleetBtn.className = "px-4 py-2 font-label-caps text-label-caps text-primary border-b-2 border-primary";
+            tabLocBtn.className = "px-4 py-2 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors";
+            contentFleet.classList.remove('hidden');
+            contentLoc.classList.add('hidden');
+        });
+
+        tabLocBtn.addEventListener('click', () => {
+            tabLocBtn.className = "px-4 py-2 font-label-caps text-label-caps text-primary border-b-2 border-primary";
+            tabFleetBtn.className = "px-4 py-2 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors";
+            contentLoc.classList.remove('hidden');
+            contentFleet.classList.add('hidden');
+        });
+    </script>
+
+{% endblock %}

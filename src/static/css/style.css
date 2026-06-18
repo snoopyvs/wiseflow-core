@@ -1,7 +1,7 @@
 :root {
   --sidebar-width: 240px;
 }
-body.sidebar-collapsed {
+html.sidebar-collapsed {
   --sidebar-width: 84px;
 }
 

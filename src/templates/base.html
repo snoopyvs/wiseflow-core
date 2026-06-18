@@ -8,6 +8,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Inter:wght@400;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"/>
     
+    <!-- Prevent FOUC for sidebar state -->
+    <script>
+        if (localStorage.getItem('sidebar_collapsed') === 'true') {
+            document.documentElement.classList.add('sidebar-collapsed');
+        }
+    </script>
+    
+    <style>
+        /* Initial states for GSAP to prevent FOUC */
+        main { opacity: 0; transform: translateY(20px); }
+        .nav-link { opacity: 0; transform: translateX(-20px); }
+    </style>
+    
     <script src="{{ url_for('static', filename='js/tailwind-config.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     

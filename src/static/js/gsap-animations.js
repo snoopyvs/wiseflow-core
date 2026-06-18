@@ -1,42 +1,42 @@
 // gsap-animations.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Restore Sidebar State from localStorage immediately to prevent flickering
+    // 1. Sidebar State Management (FOUC is already handled in head script)
     const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
     if (isCollapsed) {
-        document.body.classList.add('sidebar-collapsed');
-        // Instantly apply state to nav labels and logo
-        gsap.set('.nav-label', { opacity: 0, display: 'none' });
-        gsap.set('.logo-text', { opacity: 0, display: 'none' });
+        // Instantly apply state to nav labels and logo text to prevent flicker
+        gsap.set('.nav-label, .logo-text', { opacity: 0, display: 'none' });
     }
 
     // 2. Page Entrance Animation
-    // Fade in the main content from slightly below
-    gsap.from('main', {
-        opacity: 0,
-        y: 20,
+    // Fade in the main content (which is initially opacity-0 via CSS)
+    gsap.to('main', {
+        opacity: 1,
+        y: 0,
         duration: 0.5,
-        ease: 'power3.out'
+        ease: 'power3.out',
+        clearProps: 'transform'
     });
 
     // Animate sidebar links staggering in
-    gsap.from('.nav-link', {
-        opacity: 0,
-        x: -20,
+    gsap.to('.nav-link', {
+        opacity: 1,
+        x: 0,
         duration: 0.5,
         stagger: 0.05,
-        ease: 'power3.out'
+        ease: 'power3.out',
+        clearProps: 'transform'
     });
 
     // 3. Sidebar Toggle Logic
     const toggleBtn = document.getElementById('sidebar-toggle');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
-            const willCollapse = !document.body.classList.contains('sidebar-collapsed');
+            const willCollapse = !document.documentElement.classList.contains('sidebar-collapsed');
             
             if (willCollapse) {
                 // Collapsing
-                document.body.classList.add('sidebar-collapsed');
+                document.documentElement.classList.add('sidebar-collapsed');
                 localStorage.setItem('sidebar_collapsed', 'true');
                 
                 // Animate text out
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } else {
                 // Expanding
-                document.body.classList.remove('sidebar-collapsed');
+                document.documentElement.classList.remove('sidebar-collapsed');
                 localStorage.setItem('sidebar_collapsed', 'false');
                 
                 // Animate text in

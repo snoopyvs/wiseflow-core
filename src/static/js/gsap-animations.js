@@ -89,13 +89,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetUrl = link.getAttribute('href');
             if (!targetUrl || targetUrl.startsWith('#') || link.getAttribute('target') === '_blank') return;
             
+            // Ignore if clicking the active page
+            if (window.location.pathname === targetUrl) {
+                e.preventDefault();
+                return;
+            }
+            
             e.preventDefault();
             
             gsap.to('main', {
                 opacity: 0,
-                y: -20,
-                duration: 0.3,
-                ease: 'power3.in',
+                y: -10,
+                duration: 0.15,
+                ease: 'power2.in',
                 onComplete: () => {
                     window.location.href = targetUrl;
                 }

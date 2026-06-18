@@ -15,20 +15,25 @@
 <main class="pl-sidebar_width flex-1 w-full h-screen flex flex-col">
 <!-- Header / Toolbar -->
 <header class="h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center px-container_padding shrink-0 z-40">
-<h2 class="font-headline-md text-headline-md text-on-surface">Route Optimization Configuration</h2>
-<div class="flex items-center gap-stack_md">
-<span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded font-data-mono text-data-mono text-on-surface-variant">
-                    SESSION ID: 89A-XQ2
-                </span>
-<button onclick="location.reload()" class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant transition-colors border border-transparent hover:border-outline-variant">
-<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
-</button>
-</div>
+    <div class="flex items-center gap-3">
+        <h2 class="font-headline-md text-headline-md text-on-surface">Route Optimization Configuration</h2>
+    </div>
+    <div class="flex items-center gap-4 text-on-surface-variant">
+        <button class="hover:bg-surface-container-lowest transition-all hover:scale-95 hover:opacity-80 p-1 rounded">
+            <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+        </button>
+    </div>
 </header>
 <!-- Split Layout Wrapper -->
 <div class="flex-1 flex overflow-hidden">
 <!-- Left Input Panel (35%) -->
 <section class="w-[35%] min-w-[320px] max-w-[480px] border-r border-outline-variant bg-surface-container-low flex flex-col h-full z-30">
+<div class="p-3 border-b border-outline-variant bg-surface-container flex justify-between items-center shrink-0">
+    <span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded font-data-mono text-data-mono text-on-surface-variant text-[10px]">SESSION ID: 89A-XQ2</span>
+    <button onclick="location.reload()" class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant transition-colors border border-transparent hover:border-outline-variant" title="Refresh Page">
+        <span class="material-symbols-outlined text-[16px]" data-icon="refresh">refresh</span>
+    </button>
+</div>
 <div class="p-container_padding flex flex-col gap-stack_lg flex-1 overflow-y-auto custom-scrollbar">
 <!-- Vehicle Profile -->
 <div class="flex flex-col gap-stack_sm">
@@ -249,6 +254,19 @@ function renderDropdown(dropdownEl, results, onSelect) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Load Settings from LocalStorage
+    const defaultMode = localStorage.getItem('default_mode');
+    if (defaultMode) {
+        const modeRadio = document.querySelector(`input[name="opt_mode"][value="${defaultMode}"]`);
+        if (modeRadio) modeRadio.checked = true;
+    }
+
+    const defaultVehicle = localStorage.getItem('default_vehicle');
+    if (defaultVehicle) {
+        const vehicleSelect = document.getElementById('vehicle-select');
+        if (vehicleSelect) vehicleSelect.value = defaultVehicle;
+    }
+
     // ===== 1. SETUP MAP =====
     map = L.map('map', {
         zoomControl: false,
@@ -327,6 +345,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add button: only add if a location was selected from dropdown
     addBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        
+        const maxStopsStr = localStorage.getItem('max_stops');
+        const maxStops = maxStopsStr ? parseInt(maxStopsStr) : 25;
+        
+        if (destinations.length >= maxStops) {
+            alert(`You have reached the maximum allowed stops (${maxStops}) per route. Please check your Optimization Preferences in the Settings page.`);
+            return;
+        }
+
         if (!pendingDest) {
             // Flash input border red to indicate no valid selection
             destInput.style.borderColor = '#ef4444';

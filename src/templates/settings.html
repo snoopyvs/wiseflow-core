@@ -6,47 +6,22 @@
     {% include 'components/sidebar.html' %}
 
 <!-- Main Canvas -->
-<main class="pl-sidebar_width w-full flex flex-col min-h-screen">
+<main class="pl-sidebar_width w-full flex flex-col h-screen overflow-y-auto">
 <!-- TopNavBar -->
-<header class="h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center px-container_padding shrink-0 z-40">
+<header class="h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center px-container_padding shrink-0 z-40 sticky top-0">
 <div class="flex items-center gap-3">
 <h2 class="font-headline-md text-headline-md text-on-surface">Account &amp; Utility Settings</h2>
 </div>
-<div class="flex items-center gap-6 text-on-surface-variant">
-<button aria-label="calendar_today" class="hover:bg-surface-container-lowest transition-all rounded p-1">
-<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
-</button>
-<button aria-label="notifications" class="hover:bg-surface-container-lowest transition-all rounded p-1">
-<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-</button>
-<button aria-label="account_circle" class="hover:bg-surface-container-lowest transition-all rounded p-1">
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button aria-label="account_circle" class="hover:bg-surface-container-lowest transition-all hover:scale-95 hover:opacity-80 rounded p-1">
 <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
 </button>
 </div>
 </header>
 
 <div class="p-4 md:p-8 flex-1">
-<div class="max-w-6xl mx-auto space-y-stack_lg">
-<!-- Page Header section removed to avoid duplication with TopNavBar -->
-<div class="flex justify-end gap-3 pb-4">
-<button class="px-4 py-2 bg-transparent border border-outline-variant text-on-surface font-label-caps text-label-caps rounded hover:bg-surface-container-high transition-colors">Discard Changes</button>
-<button class="px-4 py-2 bg-primary-container text-on-primary-container font-label-caps text-label-caps font-bold rounded hover:opacity-90 transition-opacity">Save Configuration</button>
-</div>
-<!-- Content Grid Layout -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-<!-- Left Column: Navigation/TOC (Optional structural element) -->
-<div class="hidden lg:block lg:col-span-3">
-<div class="sticky top-24 bg-[#1F2937] border border-[#4B5563] p-4 rounded-lg">
-<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-4 border-b border-[#374151] pb-2">Quick Jump</h3>
-<ul class="space-y-2 font-body-sm text-body-sm">
-<li><a class="text-primary hover:underline flex items-center gap-2" href="#account-profile"><span class="w-1 h-4 bg-primary inline-block"></span>Account Profile</a></li>
-<li><a class="text-on-surface-variant hover:text-on-surface flex items-center gap-2" href="#default-constraints"><span class="w-1 h-4 bg-transparent inline-block"></span>Default Constraints</a></li>
-<li><a class="text-on-surface-variant hover:text-on-surface flex items-center gap-2" href="#integrations"><span class="w-1 h-4 bg-transparent inline-block"></span>Integrations</a></li>
-</ul>
-</div>
-</div>
-<!-- Right Column: Settings Sections -->
-<div class="lg:col-span-9 space-y-8">
+<div class="max-w-4xl mx-auto space-y-8">
+
 <!-- Section: Account Profile -->
 <section class="bg-[#1F2937] border border-[#4B5563] rounded p-6" id="account-profile">
 <div class="flex items-center gap-3 mb-6 border-b border-[#374151] pb-4">
@@ -60,10 +35,11 @@
 </div>
 <div class="space-y-1">
 <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Operational Region</label>
-<select class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none">
+<select class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
 <option>US-EAST (N. Virginia)</option>
 <option>US-WEST (Oregon)</option>
 <option>EU-CENTRAL (Frankfurt)</option>
+<option selected>APAC (Jakarta)</option>
 </select>
 </div>
 <div class="space-y-1 md:col-span-2">
@@ -72,114 +48,112 @@
 </div>
 </div>
 </section>
-<!-- Section: Default Constraints -->
-<section class="bg-[#1F2937] border border-[#4B5563] rounded p-6" id="default-constraints">
+
+<!-- Section: Optimization Preferences -->
+<section class="bg-[#1F2937] border border-[#4B5563] rounded p-6" id="routing-preferences">
 <div class="flex items-center gap-3 mb-6 border-b border-[#374151] pb-4">
-<span class="material-symbols-outlined text-primary" data-icon="tune">tune</span>
-<h2 class="font-headline-md text-headline-md text-on-surface">Default Constraints</h2>
+<span class="material-symbols-outlined text-primary" data-icon="route">route</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Optimization Preferences</h2>
 </div>
-<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">These baseline weights are applied globally to all new optimization sequences unless explicitly overridden at the sequence level.</p>
-<div class="space-y-6">
-<!-- Slider 1 -->
-<div>
-<div class="flex justify-between items-center mb-2">
-<label class="font-label-caps text-label-caps text-on-surface uppercase">Throughput Priority</label>
-<span class="font-data-mono text-data-mono text-primary bg-[#030712] px-2 py-1 rounded border border-[#374151]">0.85</span>
-</div>
-<div class="relative w-full h-2 bg-[#374151] rounded">
-<div class="absolute top-0 left-0 h-full bg-primary rounded" style="width: 85%;"></div>
-<div class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-sm border-2 border-surface cursor-pointer hover:scale-110 transition-transform" style="left: calc(85% - 8px);"></div>
-</div>
-</div>
-<!-- Slider 2 -->
-<div>
-<div class="flex justify-between items-center mb-2">
-<label class="font-label-caps text-label-caps text-on-surface uppercase">Cost Efficiency Weight</label>
-<span class="font-data-mono text-data-mono text-primary bg-[#030712] px-2 py-1 rounded border border-[#374151]">0.60</span>
-</div>
-<div class="relative w-full h-2 bg-[#374151] rounded">
-<div class="absolute top-0 left-0 h-full bg-primary rounded" style="width: 60%;"></div>
-<div class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-sm border-2 border-surface cursor-pointer hover:scale-110 transition-transform" style="left: calc(60% - 8px);"></div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">These settings will be used as the default configuration when generating new routes in the Optimizer.</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Default Vehicle Profile</label>
+<div class="relative">
+<select id="default-vehicle" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all cursor-pointer">
+{% for v in vehicles %}
+<option value="{{ v.id }}">{{ v.model }} ({{ v.capacity_kg }} kg)</option>
+{% else %}
+<option value="">No vehicles available</option>
+{% endfor %}
+</select>
 </div>
 </div>
-<!-- Slider 3 -->
-<div>
-<div class="flex justify-between items-center mb-2">
-<label class="font-label-caps text-label-caps text-on-surface uppercase">Risk Tolerance (Latency)</label>
-<span class="font-data-mono text-data-mono text-primary bg-[#030712] px-2 py-1 rounded border border-[#374151]">0.35</span>
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Default Mode Operasi</label>
+<div class="relative">
+<select id="default-mode" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all cursor-pointer">
+<option value="eco">Eco-Mode (Hemat BBM)</option>
+<option value="express">Express (Prioritas Waktu)</option>
+<option value="balanced" selected>Balanced (Seimbang)</option>
+</select>
 </div>
-<div class="relative w-full h-2 bg-[#374151] rounded">
-<div class="absolute top-0 left-0 h-full bg-primary rounded" style="width: 35%;"></div>
-<div class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-sm border-2 border-surface cursor-pointer hover:scale-110 transition-transform" style="left: calc(35% - 8px);"></div>
 </div>
+<div class="space-y-1 md:col-span-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Max Stops Per Route</label>
+<input id="max-stops" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="number" value="25" min="1"/>
+<p class="font-label-caps text-[10px] text-on-surface-variant mt-1">Maximum number of destinations allowed in a single optimization session.</p>
 </div>
 </div>
 </section>
-<!-- Section: Integrations -->
-<section class="bg-[#1F2937] border border-[#4B5563] rounded p-6" id="integrations">
-<div class="flex justify-between items-center mb-6 border-b border-[#374151] pb-4">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary" data-icon="api">api</span>
-<h2 class="font-headline-md text-headline-md text-on-surface">Integrations &amp; API</h2>
+
+
+<!-- Action Buttons -->
+<div class="flex justify-end gap-3 pt-6 mt-8 mb-8 pb-8">
+<button id="btn-discard" class="px-4 py-2 bg-transparent border border-outline-variant text-on-surface font-label-caps text-label-caps rounded hover:bg-surface-container-high transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onclick="location.reload()" disabled>Discard Changes</button>
+<button id="btn-save" class="px-4 py-2 bg-primary-container text-on-primary-container font-label-caps text-label-caps font-bold rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed" onclick="saveSettings()" disabled>Save Configuration</button>
 </div>
-<button class="flex items-center gap-1 text-primary font-label-caps text-label-caps hover:text-primary-container transition-colors">
-<span class="material-symbols-outlined text-sm" data-icon="add">add</span> Generate Token
-                            </button>
-</div>
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="border-b border-[#374151]">
-<th class="py-2 px-2 font-label-caps text-label-caps text-on-surface-variant uppercase w-1/3">Key Name</th>
-<th class="py-2 px-2 font-label-caps text-label-caps text-on-surface-variant uppercase w-1/3">Environment</th>
-<th class="py-2 px-2 font-label-caps text-label-caps text-on-surface-variant uppercase w-1/4">Status</th>
-<th class="py-2 px-2 font-label-caps text-label-caps text-on-surface-variant uppercase text-right w-auto">Actions</th>
-</tr>
-</thead>
-<tbody class="font-data-mono text-data-mono">
-<tr class="border-b border-[#374151]/50 hover:bg-[#2e3545] transition-colors h-[32px]">
-<td class="py-1 px-2 text-on-surface">ERP-Sync-Prod-01</td>
-<td class="py-1 px-2 text-on-surface-variant">Production</td>
-<td class="py-1 px-2">
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary-container/10 text-secondary-container text-[10px] uppercase font-bold tracking-wider">
-                                                Active
-                                            </span>
-</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span></button>
-</td>
-</tr>
-<tr class="border-b border-[#374151]/50 hover:bg-[#2e3545] transition-colors h-[32px]">
-<td class="py-1 px-2 text-on-surface">DataWarehouse-ETL</td>
-<td class="py-1 px-2 text-on-surface-variant">Production</td>
-<td class="py-1 px-2">
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-secondary-container/10 text-secondary-container text-[10px] uppercase font-bold tracking-wider">
-                                                Active
-                                            </span>
-</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span></button>
-</td>
-</tr>
-<tr class="hover:bg-[#2e3545] transition-colors h-[32px]">
-<td class="py-1 px-2 text-on-surface">Staging-Test-Bot</td>
-<td class="py-1 px-2 text-on-surface-variant">Sandbox</td>
-<td class="py-1 px-2">
-<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary-container/10 text-primary-container text-[10px] uppercase font-bold tracking-wider">
-                                                Expired
-                                            </span>
-</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined text-[16px]" data-icon="delete">delete</span></button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+
 </div>
 </div>
 </main>
+
+<script>
+let initialValues = {};
+
+function checkChanges() {
+    const currentMaxStops = document.getElementById('max-stops').value;
+    const currentDefaultMode = document.getElementById('default-mode').value;
+    const currentDefaultVehicle = document.getElementById('default-vehicle').value;
+
+    const hasChanged = 
+        currentMaxStops !== initialValues.maxStops ||
+        currentDefaultMode !== initialValues.defaultMode ||
+        currentDefaultVehicle !== initialValues.defaultVehicle;
+
+    document.getElementById('btn-save').disabled = !hasChanged;
+    document.getElementById('btn-discard').disabled = !hasChanged;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Load from local storage
+    const maxStops = localStorage.getItem('max_stops');
+    if (maxStops) document.getElementById('max-stops').value = maxStops;
+
+    const defaultMode = localStorage.getItem('default_mode');
+    if (defaultMode) document.getElementById('default-mode').value = defaultMode;
+
+    const defaultVehicle = localStorage.getItem('default_vehicle');
+    if (defaultVehicle) document.getElementById('default-vehicle').value = defaultVehicle;
+
+    // Store initial values
+    initialValues = {
+        maxStops: document.getElementById('max-stops').value,
+        defaultMode: document.getElementById('default-mode').value,
+        defaultVehicle: document.getElementById('default-vehicle').value
+    };
+
+    // Add event listeners
+    document.getElementById('max-stops').addEventListener('input', checkChanges);
+    document.getElementById('default-mode').addEventListener('change', checkChanges);
+    document.getElementById('default-vehicle').addEventListener('change', checkChanges);
+});
+
+function saveSettings() {
+    localStorage.setItem('max_stops', document.getElementById('max-stops').value);
+    localStorage.setItem('default_mode', document.getElementById('default-mode').value);
+    localStorage.setItem('default_vehicle', document.getElementById('default-vehicle').value);
+
+    // Update initial values
+    initialValues = {
+        maxStops: document.getElementById('max-stops').value,
+        defaultMode: document.getElementById('default-mode').value,
+        defaultVehicle: document.getElementById('default-vehicle').value
+    };
+    checkChanges();
+
+    alert('Settings saved successfully!');
+}
+</script>
 
 {% endblock %}

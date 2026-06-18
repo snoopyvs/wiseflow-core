@@ -4,6 +4,7 @@ from src.extensions import db
 from src.models import Partner, Vehicle, RouteHistory
 from src.ai_optimizer import solve_routing
 import uuid
+import datetime
 
 app = Flask(__name__)
 
@@ -49,7 +50,8 @@ def history():
 
 @app.route('/settings')
 def settings():
-    return render_template('settings.html')
+    vehicles = Vehicle.query.all()
+    return render_template('settings.html', vehicles=vehicles)
 
 @app.route('/api/vehicles', methods=['POST'])
 def add_vehicle():
@@ -114,7 +116,8 @@ def api_optimize():
     
     if partner and vehicle:
         # Generate a random route code like RT-8924A
-        route_code = f"RT-{str(uuid.uuid4())[:6].upper()}"
+        date_str = datetime.datetime.now().strftime("%y%m%d")
+        route_code = f"ADM-ORD-{date_str}-{str(uuid.uuid4())[:4].upper()}"
         
         fuel_liters = result_astar['total_distance_km'] / vehicle.fuel_efficiency_kml if vehicle.fuel_efficiency_kml else 0
         fuel_cost = fuel_liters * 6800 # Mock fuel price: Rp 6.800 / Liter (Subsidized Solar)

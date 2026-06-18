@@ -17,8 +17,8 @@
     
     <style>
         /* Initial states for GSAP to prevent FOUC */
-        main { opacity: 0; transform: translateY(20px); }
-        .nav-link { opacity: 0; transform: translateX(-20px); }
+        body:not(.gsap-loaded) main { opacity: 0; transform: translateY(20px); }
+        body:not(.gsap-loaded) .nav-link { opacity: 0; transform: translateX(-20px); }
     </style>
     
     <script src="{{ url_for('static', filename='js/tailwind-config.js') }}"></script>

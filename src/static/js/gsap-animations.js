@@ -1,34 +1,27 @@
 // gsap-animations.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Sidebar State Management (FOUC is already handled in head script)
+    // 1. Sidebar State Management (FOUC handled in head script)
     const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
     if (isCollapsed) {
-        // Instantly apply state to nav labels and logo text to prevent flicker
         gsap.set('.nav-label, .logo-text', { opacity: 0, display: 'none' });
     }
 
-    // 2. Page Entrance Animation
-    // Fade in the main content (which is initially opacity-0 via CSS)
-    gsap.to('main', {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power3.out',
-        clearProps: 'transform'
-    });
+    // 2. Add gsap-loaded class to body to release the CSS FOUC locks
+    document.body.classList.add('gsap-loaded');
 
-    // Animate sidebar links staggering in
-    gsap.to('.nav-link', {
-        opacity: 1,
-        x: 0,
-        duration: 0.5,
-        stagger: 0.05,
-        ease: 'power3.out',
-        clearProps: 'transform'
-    });
+    // 3. Page Entrance Animation
+    gsap.fromTo('main', 
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', clearProps: 'all' }
+    );
 
-    // 3. Sidebar Toggle Logic
+    gsap.fromTo('.nav-link', 
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: 'power3.out', clearProps: 'all' }
+    );
+
+    // 4. Sidebar Toggle Logic
     const toggleBtn = document.getElementById('sidebar-toggle');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
@@ -76,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Map Leaflet resize fix if map exists
             if (typeof map !== 'undefined' && map !== null) {
-                setTimeout(() => { map.invalidateSize(); }, 350); // wait for css transition
+                setTimeout(() => { map.invalidateSize(); }, 350);
             }
         });
 
@@ -86,39 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 4. Hover Animations for Nav Links
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        // Only apply hover animation if it's not the active link
-        if (!link.classList.contains('bg-surface-container-highest')) {
-            link.addEventListener('mouseenter', () => {
-                gsap.to(link, { 
-                    x: 5, 
-                    duration: 0.2, 
-                    ease: "power2.out" 
-                });
-            });
-            link.addEventListener('mouseleave', () => {
-                gsap.to(link, { 
-                    x: 0, 
-                    duration: 0.2, 
-                    ease: "power2.out" 
-                });
-            });
-        }
-    });
-
     // 5. Page Exit Animation (Intercept Links)
     const transitionLinks = document.querySelectorAll('a.nav-link');
     transitionLinks.forEach(link => {
         link.addEventListener('click', (e) => {
+            // Ignore collapse button
+            if (link.id === 'sidebar-toggle') return;
+
             const targetUrl = link.getAttribute('href');
-            // If it's a new tab, internal anchor, or the same page, ignore exit animation
-            if (targetUrl.startsWith('#') || link.getAttribute('target') === '_blank') return;
+            if (!targetUrl || targetUrl.startsWith('#') || link.getAttribute('target') === '_blank') return;
             
             e.preventDefault();
             
-            // GSAP exit animation
             gsap.to('main', {
                 opacity: 0,
                 y: -20,

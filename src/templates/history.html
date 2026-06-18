@@ -9,34 +9,50 @@
 <!-- Main Content Area -->
 <main class="pl-sidebar_width w-full min-h-screen flex flex-col relative">
 <!-- Header / Controls -->
-<header class="h-14 border-b border-outline-variant bg-surface-container flex justify-between items-center px-container_padding shrink-0 z-40">
-<div class="flex items-center gap-3">
-<h2 class="font-headline-md text-headline-md text-on-surface">History Logs</h2>
-<span class="font-body-sm text-body-sm text-on-surface-variant hidden md:inline border-l border-outline-variant pl-3 ml-1">Review and export completed route data.</span>
-</div>
-<div class="flex items-center gap-stack_sm">
-<div class="relative flex-1 md:w-64">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" data-icon="search">search</span>
-<input class="w-full bg-[#030712] border border-[#374151] rounded-DEFAULT py-2 pl-9 pr-3 text-on-surface font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" placeholder="Search Route ID..." type="text"/>
-</div>
-<div class="relative hidden sm:block">
-<button class="bg-[#030712] border border-[#374151] rounded-DEFAULT py-2 px-3 text-on-surface font-body-sm flex items-center gap-2 hover:bg-surface-container-high transition-colors">
-<span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
-<span>Last 7 Days</span>
-<span class="material-symbols-outlined text-[16px]" data-icon="arrow_drop_down">arrow_drop_down</span>
-</button>
-</div>
-<div class="flex gap-2 ml-auto">
-<button class="bg-transparent border border-[#374151] text-white font-label-caps text-label-caps px-4 py-2 rounded-DEFAULT flex items-center gap-2 hover:bg-surface-container-high transition-colors" title="Export CSV">
-<span class="material-symbols-outlined text-[16px]" data-icon="csv">csv</span>
-<span class="hidden sm:inline">CSV</span>
-</button>
-<button class="bg-transparent border border-[#374151] text-white font-label-caps text-label-caps px-4 py-2 rounded-DEFAULT flex items-center gap-2 hover:bg-surface-container-high transition-colors" title="Download PDF">
-<span class="material-symbols-outlined text-[16px]" data-icon="picture_as_pdf">picture_as_pdf</span>
-<span class="hidden sm:inline">PDF</span>
-</button>
-</div>
-</div>
+<header class="border-b border-outline-variant bg-surface-container px-container_padding py-4 shrink-0 z-40 flex flex-col gap-4">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+        <!-- Title & Info -->
+        <div class="flex items-center gap-3">
+            <h2 class="font-headline-md text-headline-md text-on-surface">History Logs</h2>
+            <div class="hidden md:flex flex-col border-l border-outline-variant pl-3 ml-1">
+                <span class="font-body-sm text-body-sm text-on-surface-variant">Review and export completed route data.</span>
+                <span class="text-[10px] text-primary">Note: Fuel expense is based on current subsidized solar price (Rp 6.800/L).</span>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex items-center gap-3">
+            <!-- Search -->
+            <div class="relative w-48 sm:w-64">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" data-icon="search">search</span>
+                <input id="search-input" class="w-full h-[36px] bg-[#030712] border border-[#374151] rounded py-1 pl-9 pr-3 text-on-surface font-body-sm focus:outline-none focus:border-primary transition-colors" placeholder="Search Route ID..." type="text"/>
+            </div>
+            
+            <!-- Date Filter -->
+            <div class="relative">
+                <select id="date-filter" class="appearance-none h-[36px] bg-[#030712] border border-[#374151] rounded py-1 pl-3 pr-8 text-on-surface font-label-caps text-label-caps focus:outline-none focus:border-primary cursor-pointer hover:bg-surface-container-high transition-colors">
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="last7days" selected>Last 7 Days</option>
+                    <option value="last30days">Last 30 Days</option>
+                </select>
+                <span class="material-symbols-outlined text-[16px] absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" data-icon="arrow_drop_down">arrow_drop_down</span>
+            </div>
+
+            <!-- Export -->
+            <div class="relative group">
+                <button class="h-[36px] bg-[#030712] border border-[#374151] text-on-surface font-label-caps text-label-caps px-3 rounded flex items-center gap-2 hover:bg-surface-container-high transition-colors cursor-pointer" title="Export">
+                    <span class="material-symbols-outlined text-[16px]" data-icon="download">download</span>
+                    <span class="hidden sm:inline">Export</span>
+                    <span class="material-symbols-outlined text-[16px]" data-icon="arrow_drop_down">arrow_drop_down</span>
+                </button>
+                <div class="absolute right-0 top-full mt-1 hidden group-hover:block bg-[#1F2937] border border-[#374151] rounded shadow-lg z-50 w-[120px]">
+                    <button class="w-full text-left px-4 py-2 hover:bg-surface-container-high text-on-surface font-body-sm flex items-center gap-2"><span class="material-symbols-outlined text-[16px]" data-icon="csv">csv</span> CSV</button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-surface-container-high text-on-surface font-body-sm flex items-center gap-2"><span class="material-symbols-outlined text-[16px]" data-icon="picture_as_pdf">picture_as_pdf</span> PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
 <!-- Data Grid Area -->
 <div class="flex-1 p-stack_lg overflow-x-auto bg-[#0c1322]">
@@ -51,14 +67,14 @@
 <div class="font-label-caps text-label-caps text-on-surface-variant col-span-1 text-right">Actions</div>
 </div>
 <!-- Table Body -->
-<div class="flex flex-col">
-<!-- Row 1 -->
-<div class="grid grid-cols-6 gap-4 p-4 border-b border-[#374151] data-table-row items-center">
-<div class="font-data-mono text-data-mono text-primary col-span-1 border-l-2 border-primary pl-2 -ml-4">RT-8924A</div>
-<div class="font-body-sm text-body-sm text-on-surface col-span-1">VH-012 (Heavy)</div>
-<div class="font-data-mono text-data-mono text-on-surface-variant col-span-1">2023-10-27 08:42</div>
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 text-right">14</div>
-<div class="font-data-mono text-data-mono text-[#00a572] col-span-1 text-right">$142.50</div>
+<div class="flex flex-col" id="history-table-body">
+{% for log in history_logs %}
+<div class="grid grid-cols-6 gap-4 p-4 border-b border-[#374151] data-table-row items-center log-row" data-date="{{ log.created_at.strftime('%Y-%m-%d') }}">
+<div class="font-data-mono text-data-mono text-primary col-span-1 border-l-2 border-primary pl-2 -ml-4 route-id">{{ log.route_code }}</div>
+<div class="font-body-sm text-body-sm text-on-surface col-span-1 truncate" title="{{ log.vehicle.plate_number }} ({{ log.vehicle.model }})">{{ log.vehicle.plate_number }} <span class="text-xs text-on-surface-variant hidden lg:inline">({{ log.vehicle.model }})</span></div>
+<div class="font-data-mono text-data-mono text-on-surface-variant col-span-1">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+<div class="font-data-mono text-data-mono text-on-surface col-span-1 text-right">{{ log.total_stops }}</div>
+<div class="font-data-mono text-data-mono text-[#00a572] col-span-1 text-right">Rp {{ "{:,.0f}".format(log.estimated_fuel_cost).replace(',', '.') }}</div>
 <div class="col-span-1 flex justify-end gap-2">
 <button class="text-on-surface-variant hover:text-white transition-colors" title="Dispatch Log">
 <span class="material-symbols-outlined text-[18px]" data-icon="local_shipping">local_shipping</span>
@@ -68,75 +84,14 @@
 </button>
 </div>
 </div>
-<!-- Row 2 -->
-<div class="grid grid-cols-6 gap-4 p-4 border-b border-[#374151] data-table-row items-center">
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 pl-2 -ml-4">RT-8923B</div>
-<div class="font-body-sm text-body-sm text-on-surface col-span-1">VH-045 (Medium)</div>
-<div class="font-data-mono text-data-mono text-on-surface-variant col-span-1">2023-10-27 07:15</div>
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 text-right">8</div>
-<div class="font-data-mono text-data-mono text-[#00a572] col-span-1 text-right">$85.20</div>
-<div class="col-span-1 flex justify-end gap-2">
-<button class="text-on-surface-variant hover:text-white transition-colors" title="Dispatch Log">
-<span class="material-symbols-outlined text-[18px]" data-icon="local_shipping">local_shipping</span>
-</button>
-<button class="text-on-surface-variant hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[18px]" data-icon="visibility">visibility</span>
-</button>
-</div>
-</div>
-<!-- Row 3 -->
-<div class="grid grid-cols-6 gap-4 p-4 border-b border-[#374151] data-table-row items-center">
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 pl-2 -ml-4">RT-8922C</div>
-<div class="font-body-sm text-body-sm text-on-surface col-span-1">VH-003 (Light)</div>
-<div class="font-data-mono text-data-mono text-on-surface-variant col-span-1">2023-10-26 14:30</div>
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 text-right">22</div>
-<div class="font-data-mono text-data-mono text-[#f59e0b] col-span-1 text-right">$210.00</div>
-<div class="col-span-1 flex justify-end gap-2">
-<button class="text-on-surface-variant hover:text-white transition-colors" title="Dispatch Log">
-<span class="material-symbols-outlined text-[18px]" data-icon="local_shipping">local_shipping</span>
-</button>
-<button class="text-on-surface-variant hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[18px]" data-icon="visibility">visibility</span>
-</button>
-</div>
-</div>
-<!-- Row 4 -->
-<div class="grid grid-cols-6 gap-4 p-4 border-b border-[#374151] data-table-row items-center">
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 pl-2 -ml-4">RT-8921D</div>
-<div class="font-body-sm text-body-sm text-on-surface col-span-1">VH-088 (Heavy)</div>
-<div class="font-data-mono text-data-mono text-on-surface-variant col-span-1">2023-10-26 09:00</div>
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 text-right">5</div>
-<div class="font-data-mono text-data-mono text-[#ffb4ab] col-span-1 text-right">$340.50</div>
-<div class="col-span-1 flex justify-end gap-2">
-<button class="text-on-surface-variant hover:text-white transition-colors" title="Dispatch Log">
-<span class="material-symbols-outlined text-[18px]" data-icon="local_shipping">local_shipping</span>
-</button>
-<button class="text-on-surface-variant hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[18px]" data-icon="visibility">visibility</span>
-</button>
-</div>
-</div>
-<!-- Row 5 -->
-<div class="grid grid-cols-6 gap-4 p-4 data-table-row items-center">
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 pl-2 -ml-4">RT-8920E</div>
-<div class="font-body-sm text-body-sm text-on-surface col-span-1">VH-015 (Medium)</div>
-<div class="font-data-mono text-data-mono text-on-surface-variant col-span-1">2023-10-25 11:20</div>
-<div class="font-data-mono text-data-mono text-on-surface col-span-1 text-right">18</div>
-<div class="font-data-mono text-data-mono text-[#00a572] col-span-1 text-right">$115.75</div>
-<div class="col-span-1 flex justify-end gap-2">
-<button class="text-on-surface-variant hover:text-white transition-colors" title="Dispatch Log">
-<span class="material-symbols-outlined text-[18px]" data-icon="local_shipping">local_shipping</span>
-</button>
-<button class="text-on-surface-variant hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[18px]" data-icon="visibility">visibility</span>
-</button>
-</div>
-</div>
+{% else %}
+<div class="p-8 text-center text-on-surface-variant col-span-6">No history logs found.</div>
+{% endfor %}
 </div>
 </div>
 <!-- Pagination Controls (Minimalist) -->
 <div class="mt-stack_md flex justify-between items-center text-on-surface-variant font-body-sm">
-<span>Showing 1-5 of 1,204 logs</span>
+<span id="pagination-text">Showing 1-X of Y logs</span>
 <div class="flex gap-2">
 <button class="p-1 hover:text-white transition-colors disabled:opacity-50" disabled="">
 <span class="material-symbols-outlined text-[20px]" data-icon="chevron_left">chevron_left</span>
@@ -148,5 +103,60 @@
 </div>
 </div>
 </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input');
+    const dateFilter = document.getElementById('date-filter');
+    const rows = document.querySelectorAll('.log-row');
+    const paginationText = document.getElementById('pagination-text');
+    
+    function filterTable() {
+        const query = searchInput.value.toLowerCase();
+        const filterVal = dateFilter.value;
+        const now = new Date();
+        now.setHours(0,0,0,0);
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const routeId = row.querySelector('.route-id').textContent.toLowerCase();
+            const dateStr = row.getAttribute('data-date');
+            const rowDate = new Date(dateStr);
+            rowDate.setHours(0,0,0,0);
+            
+            const diffTime = now.getTime() - rowDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            let dateMatch = true;
+            if (filterVal === 'today') {
+                dateMatch = diffDays === 0;
+            } else if (filterVal === 'yesterday') {
+                dateMatch = diffDays === 1;
+            } else if (filterVal === 'last7days') {
+                dateMatch = diffDays <= 7;
+            } else if (filterVal === 'last30days') {
+                dateMatch = diffDays <= 30;
+            }
+            
+            const searchMatch = routeId.includes(query);
+            
+            if (dateMatch && searchMatch) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        paginationText.textContent = `Showing 1-${visibleCount} of ${visibleCount} logs`;
+    }
+    
+    searchInput.addEventListener('input', filterTable);
+    dateFilter.addEventListener('change', filterTable);
+    
+    // Initial filter run
+    filterTable();
+});
+</script>
 
 {% endblock %}

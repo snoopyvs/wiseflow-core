@@ -58,7 +58,7 @@ tailwind.config = {
                 "full": "0.75rem"
         },
         "spacing": {
-                "sidebar_width": "240px",
+                "sidebar_width": "var(--sidebar-width)",
                 "container_padding": "16px",
                 "stack_sm": "8px",
                 "gutter": "12px",

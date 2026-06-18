@@ -1,3 +1,14 @@
+:root {
+  --sidebar-width: 240px;
+}
+body.sidebar-collapsed {
+  --sidebar-width: 84px;
+}
+
+nav.w-sidebar_width, main.pl-sidebar_width {
+    transition: width 0.3s ease, padding-left 0.3s ease;
+}
+
 body { background-color: theme('colors.surface-dim'); color: theme('colors.on-surface'); }
         .card { background-color: theme('colors.surface-container'); border: 1px solid theme('colors.outline-variant'); border-radius: theme('borderRadius.DEFAULT'); }
         .btn-primary { background-color: theme('colors.primary'); color: theme('colors.on-primary'); font-family: theme('fontFamily.label-caps'); font-size: theme('fontSize.label-caps')[0]; font-weight: 700; text-transform: uppercase; padding: 8px 16px; border-radius: theme('borderRadius.DEFAULT'); transition: all 0.2s; }

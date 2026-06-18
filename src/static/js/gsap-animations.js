@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Animate text out
                 gsap.to('.nav-label, .logo-text', {
                     opacity: 0,
-                    duration: 0.2,
+                    duration: 0.1,
                     onComplete: () => {
                         gsap.set('.nav-label, .logo-text', { display: 'none' });
                     }
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Animate the toggle icon rotation
                 gsap.to(toggleBtn.querySelector('.material-symbols-outlined'), {
                     rotation: 180,
-                    duration: 0.3
+                    duration: 0.15
                 });
 
             } else {
@@ -56,20 +56,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 gsap.set('.nav-label, .logo-text', { display: 'inline-block' });
                 gsap.to('.nav-label, .logo-text', {
                     opacity: 1,
-                    duration: 0.3,
-                    delay: 0.1 // Wait for width transition to start
+                    duration: 0.15,
+                    delay: 0.05 // Wait for width transition to start
                 });
 
                 // Animate the toggle icon rotation
                 gsap.to(toggleBtn.querySelector('.material-symbols-outlined'), {
                     rotation: 0,
-                    duration: 0.3
+                    duration: 0.15
                 });
             }
             
             // Map Leaflet resize fix if map exists
             if (typeof map !== 'undefined' && map !== null) {
-                setTimeout(() => { map.invalidateSize(); }, 350);
+                setTimeout(() => { map.invalidateSize(); }, 160);
             }
         });
 

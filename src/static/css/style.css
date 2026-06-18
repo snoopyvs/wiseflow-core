@@ -6,7 +6,7 @@ html.sidebar-collapsed {
 }
 
 nav.w-sidebar_width, main.pl-sidebar_width {
-    transition: width 0.3s ease, padding-left 0.3s ease;
+    transition: width 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), padding-left 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 body { background-color: theme('colors.surface-dim'); color: theme('colors.on-surface'); }

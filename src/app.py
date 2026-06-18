@@ -34,25 +34,68 @@ def register():
 
 @app.route('/master-data')
 def master_data():
-    return render_template('master_data.html')
+    vehicles = Vehicle.query.all()
+    return render_template('master_data.html', vehicles=vehicles)
 
 @app.route('/optimizer')
 def optimizer():
-    return render_template('optimizer.html')
+    vehicles = Vehicle.query.all()
+    return render_template('optimizer.html', vehicles=vehicles)
 
 @app.route('/history')
 def history():
-    return render_template('history.html')
+    history_logs = RouteHistory.query.order_by(RouteHistory.created_at.desc()).all()
+    return render_template('history.html', history_logs=history_logs)
 
 @app.route('/settings')
 def settings():
     return render_template('settings.html')
+
+@app.route('/api/vehicles', methods=['POST'])
+def add_vehicle():
+    data = request.json
+    partner = Partner.query.first() # Using mock partner
+    if not partner:
+        return jsonify({"error": "No partner found"}), 400
+    
+    new_vehicle = Vehicle(
+        partner_id=partner.id,
+        plate_number=data.get('plate_number'),
+        model=data.get('model'),
+        capacity_kg=float(data.get('capacity_kg', 0)),
+        fuel_efficiency_kml=float(data.get('fuel_efficiency_kml', 0)),
+        status="Active"
+    )
+    db.session.add(new_vehicle)
+    db.session.commit()
+    return jsonify({"message": "Vehicle added successfully", "id": new_vehicle.id})
+
+@app.route('/api/vehicles/<int:id>', methods=['PUT'])
+def update_vehicle(id):
+    data = request.json
+    vehicle = Vehicle.query.get_or_404(id)
+    
+    vehicle.plate_number = data.get('plate_number', vehicle.plate_number)
+    vehicle.model = data.get('model', vehicle.model)
+    vehicle.capacity_kg = float(data.get('capacity_kg', vehicle.capacity_kg))
+    vehicle.fuel_efficiency_kml = float(data.get('fuel_efficiency_kml', vehicle.fuel_efficiency_kml))
+    
+    db.session.commit()
+    return jsonify({"message": "Vehicle updated successfully"})
+
+@app.route('/api/vehicles/<int:id>', methods=['DELETE'])
+def delete_vehicle(id):
+    vehicle = Vehicle.query.get_or_404(id)
+    db.session.delete(vehicle)
+    db.session.commit()
+    return jsonify({"message": "Vehicle deleted successfully"})
 
 @app.route('/api/optimize', methods=['POST'])
 def api_optimize():
     data = request.json
     start_point = data.get('start_point')
     destinations = data.get('destinations', [])
+    vehicle_id = data.get('vehicle_id')
     mode = data.get('mode', 'balanced')
     
     if not start_point or not destinations:
@@ -65,21 +108,23 @@ def api_optimize():
     result_astar = solve_routing(locations, use_heuristic=True, mode=mode.capitalize())
     result_dijkstra = solve_routing(locations, use_heuristic=False, mode=mode.capitalize())
     
-    # Save to database (using dummy vehicle and partner for now)
-    # We pick the first partner and vehicle from our seed data
+    # Save to database
     partner = Partner.query.first()
-    vehicle = Vehicle.query.first()
+    vehicle = Vehicle.query.get(vehicle_id) if vehicle_id else None
     
     if partner and vehicle:
         # Generate a random route code like RT-8924A
         route_code = f"RT-{str(uuid.uuid4())[:6].upper()}"
+        
+        fuel_liters = result_astar['total_distance_km'] / vehicle.fuel_efficiency_kml if vehicle.fuel_efficiency_kml else 0
+        fuel_cost = fuel_liters * 6800 # Mock fuel price: Rp 6.800 / Liter (Subsidized Solar)
         
         history = RouteHistory(
             partner_id=partner.id,
             vehicle_id=vehicle.id,
             route_code=route_code,
             total_distance_km=result_astar['total_distance_km'],
-            estimated_fuel_cost=result_astar['total_distance_km'] * 15000, # Mock fuel cost calculation
+            estimated_fuel_cost=fuel_cost,
             total_stops=len(destinations),
             optimization_mode=mode.capitalize()
         )
@@ -93,4 +138,4 @@ def api_optimize():
 
 if __name__ == '__main__':
     # Menjalankan server Flask dalam mode debug
-    app.run(debug=True, port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5001)

@@ -32,15 +32,12 @@
 <button class="px-4 py-2 font-label-caps text-label-caps text-primary border-b-2 border-primary" id="tab-fleet">
                     Fleet Registry
                 </button>
-<button class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors" id="tab-locations">
-                    Location Address Book
-                </button>
 </div>
 <!-- Tab A: Fleet Registry -->
 <div class="flex flex-col gap-stack_md" id="content-fleet">
 <div class="flex justify-between items-center">
 <h3 class="font-headline-md text-headline-md text-on-surface">Active Fleet</h3>
-<button class="bg-primary text-on-primary font-bold px-4 py-2 rounded text-sm hover:bg-surface-tint transition-colors flex items-center gap-2">
+<button id="add-truck-btn" class="bg-primary text-on-primary font-bold px-4 py-2 rounded text-sm hover:bg-surface-tint transition-colors flex items-center gap-2">
 <span class="material-symbols-outlined" data-icon="add" style="font-size: 18px;">add</span>
                         Add Truck
                     </button>
@@ -58,123 +55,147 @@
 </tr>
 </thead>
 <tbody class="font-data-mono text-data-mono text-on-surface">
+{% for v in vehicles %}
 <tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
-<td class="py-1 px-2 border-l-2 border-primary pl-[6px]">AX-7729</td>
-<td class="py-1 px-2">Volvo FH16</td>
-<td class="py-1 px-2">24000</td>
-<td class="py-1 px-2">3.2</td>
+<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">{{ v.plate_number }}</td>
+<td class="py-1 px-2">{{ v.model }}</td>
+<td class="py-1 px-2">{{ v.capacity_kg }}</td>
+<td class="py-1 px-2">{{ v.fuel_efficiency_kml }}</td>
 <td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+<button class="text-on-surface-variant hover:text-primary" onclick="openEditModal({{ v.id }}, '{{ v.plate_number }}', '{{ v.model }}', {{ v.capacity_kg }}, {{ v.fuel_efficiency_kml }})"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
+<button class="text-on-surface-variant hover:text-error ml-2" onclick="deleteTruck({{ v.id }})"><span class="material-symbols-outlined" data-icon="delete" style="font-size: 16px;">delete</span></button>
 </td>
 </tr>
-<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
-<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">BR-9011</td>
-<td class="py-1 px-2">Scania R500</td>
-<td class="py-1 px-2">22000</td>
-<td class="py-1 px-2">3.5</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
-</td>
-</tr>
-<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
-<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">CZ-4432</td>
-<td class="py-1 px-2">Mercedes Actros</td>
-<td class="py-1 px-2">26000</td>
-<td class="py-1 px-2">2.9</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
-</td>
-</tr>
-<tr class="hover:bg-surface-container-high transition-colors h-[32px]">
-<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">DK-1188</td>
-<td class="py-1 px-2">Volvo FH</td>
-<td class="py-1 px-2">24000</td>
-<td class="py-1 px-2">3.3</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
-</td>
-</tr>
+{% else %}
+<tr><td colspan="5" class="py-4 text-center text-on-surface-variant">No vehicles found. Click "Add Truck" to create one.</td></tr>
+{% endfor %}
 </tbody>
 </table>
 </div>
 </div>
 </div>
-<!-- Tab B: Location Address Book (Initially Hidden for demo, but generated) -->
-<div class="hidden flex flex-col gap-stack_md" id="content-locations">
-<div class="flex justify-between items-center">
-<h3 class="font-headline-md text-headline-md text-on-surface">Destination Network</h3>
-<button class="bg-primary text-on-primary font-bold px-4 py-2 rounded text-sm hover:bg-surface-tint transition-colors flex items-center gap-2">
-<span class="material-symbols-outlined" data-icon="add_location" style="font-size: 18px;">add_location</span>
-                        Add New Destination
-                    </button>
+<!-- Modal for Add/Edit Truck -->
+<div id="truck-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm">
+    <div class="bg-surface-container border border-outline-variant rounded p-6 w-[400px] shadow-lg">
+        <h3 id="modal-title" class="font-headline-md text-headline-md text-on-surface mb-4">Add Truck</h3>
+        <form id="truck-form" class="flex flex-col gap-4">
+            <input type="hidden" id="truck-id">
+            
+            <div class="flex flex-col gap-1">
+                <label class="font-label-caps text-label-caps text-on-surface-variant">Plate Number</label>
+                <input type="text" id="truck-plate" required class="bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary">
+            </div>
+            
+            <div class="flex flex-col gap-1">
+                <label class="font-label-caps text-label-caps text-on-surface-variant">Model</label>
+                <input type="text" id="truck-model" required class="bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary">
+            </div>
+            
+            <div class="flex gap-4">
+                <div class="flex flex-col gap-1 flex-1">
+                    <label class="font-label-caps text-label-caps text-on-surface-variant">Capacity (kg)</label>
+                    <input type="number" step="0.1" id="truck-capacity" required class="bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary">
+                </div>
+                
+                <div class="flex flex-col gap-1 flex-1">
+                    <label class="font-label-caps text-label-caps text-on-surface-variant">Fuel (km/L)</label>
+                    <input type="number" step="0.1" id="truck-fuel" required class="bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md focus:outline-none focus:border-primary">
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" id="cancel-btn" class="px-4 py-2 font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-lowest rounded transition-colors">Cancel</button>
+                <button type="submit" class="bg-primary text-[#000] px-4 py-2 font-bold rounded text-sm hover:bg-surface-tint transition-colors">Save</button>
+            </div>
+        </form>
+    </div>
 </div>
-<div class="bg-surface-container border border-outline-variant rounded p-4">
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="border-b border-outline-variant text-on-surface-variant">
-<th class="py-2 px-2 font-label-caps text-label-caps">ID</th>
-<th class="py-2 px-2 font-label-caps text-label-caps">Name</th>
-<th class="py-2 px-2 font-label-caps text-label-caps">Lat/Lon</th>
-<th class="py-2 px-2 font-label-caps text-label-caps">Demand kg</th>
-<th class="py-2 px-2 font-label-caps text-label-caps text-right">Actions</th>
-</tr>
-</thead>
-<tbody class="font-data-mono text-data-mono text-on-surface">
-<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
-<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">LOC-001</td>
-<td class="py-1 px-2">North Hub</td>
-<td class="py-1 px-2">51.5074, -0.1278</td>
-<td class="py-1 px-2 text-secondary">4500</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
-</td>
-</tr>
-<tr class="border-b border-outline-variant hover:bg-surface-container-high transition-colors h-[32px]">
-<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">LOC-002</td>
-<td class="py-1 px-2">East Depot</td>
-<td class="py-1 px-2">51.5200, -0.0500</td>
-<td class="py-1 px-2">1200</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
-</td>
-</tr>
-<tr class="hover:bg-surface-container-high transition-colors h-[32px]">
-<td class="py-1 px-2 border-l-2 border-transparent pl-[6px]">LOC-003</td>
-<td class="py-1 px-2">South Terminal</td>
-<td class="py-1 px-2">51.4800, -0.1000</td>
-<td class="py-1 px-2 text-primary">8000</td>
-<td class="py-1 px-2 text-right">
-<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit" style="font-size: 16px;">edit</span></button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
+
 </main>
 </div>
 <script>
-        // Simple tab switching logic
-        const tabFleetBtn = document.getElementById('tab-fleet');
-        const tabLocBtn = document.getElementById('tab-locations');
-        const contentFleet = document.getElementById('content-fleet');
-        const contentLoc = document.getElementById('content-locations');
+    // Modal logic
+    const modal = document.getElementById('truck-modal');
+    const form = document.getElementById('truck-form');
+    const addBtn = document.getElementById('add-truck-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const modalTitle = document.getElementById('modal-title');
+    
+    // Inputs
+    const idInput = document.getElementById('truck-id');
+    const plateInput = document.getElementById('truck-plate');
+    const modelInput = document.getElementById('truck-model');
+    const capacityInput = document.getElementById('truck-capacity');
+    const fuelInput = document.getElementById('truck-fuel');
 
-        tabFleetBtn.addEventListener('click', () => {
-            tabFleetBtn.className = "px-4 py-2 font-label-caps text-label-caps text-primary border-b-2 border-primary";
-            tabLocBtn.className = "px-4 py-2 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors";
-            contentFleet.classList.remove('hidden');
-            contentLoc.classList.add('hidden');
-        });
+    addBtn.addEventListener('click', () => {
+        idInput.value = '';
+        plateInput.value = '';
+        modelInput.value = '';
+        capacityInput.value = '';
+        fuelInput.value = '';
+        modalTitle.textContent = 'Add Truck';
+        modal.classList.remove('hidden');
+    });
 
-        tabLocBtn.addEventListener('click', () => {
-            tabLocBtn.className = "px-4 py-2 font-label-caps text-label-caps text-primary border-b-2 border-primary";
-            tabFleetBtn.className = "px-4 py-2 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors";
-            contentLoc.classList.remove('hidden');
-            contentFleet.classList.add('hidden');
-        });
-    </script>
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    window.openEditModal = function(id, plate, model, capacity, fuel) {
+        idInput.value = id;
+        plateInput.value = plate;
+        modelInput.value = model;
+        capacityInput.value = capacity;
+        fuelInput.value = fuel;
+        modalTitle.textContent = 'Edit Truck';
+        modal.classList.remove('hidden');
+    };
+
+    window.deleteTruck = async function(id) {
+        if (!confirm('Are you sure you want to delete this truck?')) return;
+        try {
+            const res = await fetch(`/api/vehicles/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                location.reload();
+            } else {
+                alert('Failed to delete truck');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = idInput.value;
+        const payload = {
+            plate_number: plateInput.value,
+            model: modelInput.value,
+            capacity_kg: parseFloat(capacityInput.value),
+            fuel_efficiency_kml: parseFloat(fuelInput.value)
+        };
+        
+        const url = id ? `/api/vehicles/${id}` : '/api/vehicles';
+        const method = id ? 'PUT' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                location.reload();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to save truck');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('An error occurred');
+        }
+    });
+</script>
 
 {% endblock %}

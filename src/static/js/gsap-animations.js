@@ -3,9 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Sidebar State Management (FOUC handled in head script)
     const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
-    if (isCollapsed) {
-        gsap.set('.nav-label, .logo-text', { opacity: 0, display: 'none' });
-    }
+    // Removed gsap.set display none, handled by CSS
 
     // 2. Add gsap-loaded class to body to release the CSS FOUC locks
     document.body.classList.add('gsap-loaded');
@@ -21,51 +19,18 @@ document.addEventListener('DOMContentLoaded', () => {
         { opacity: 1, x: 0, duration: 0.5, stagger: 0.05, ease: 'power3.out', clearProps: 'all' }
     );
 
-    // 4. Sidebar Toggle Logic
+    // 4. Sidebar Toggle Logic (Using CSS instead of GSAP)
     const toggleBtn = document.getElementById('sidebar-toggle');
     if (toggleBtn) {
         toggleBtn.addEventListener('click', () => {
             const willCollapse = !document.documentElement.classList.contains('sidebar-collapsed');
             
             if (willCollapse) {
-                // Collapsing
                 document.documentElement.classList.add('sidebar-collapsed');
                 localStorage.setItem('sidebar_collapsed', 'true');
-                
-                // Animate text out
-                gsap.to('.nav-label, .logo-text', {
-                    opacity: 0,
-                    duration: 0.1,
-                    onComplete: () => {
-                        gsap.set('.nav-label, .logo-text', { display: 'none' });
-                    }
-                });
-                
-                // Animate the toggle icon rotation
-                gsap.to(toggleBtn.querySelector('.material-symbols-outlined'), {
-                    rotation: 180,
-                    duration: 0.15
-                });
-
             } else {
-                // Expanding
                 document.documentElement.classList.remove('sidebar-collapsed');
                 localStorage.setItem('sidebar_collapsed', 'false');
-                
-                // Animate text in
-                gsap.set('.nav-label', { display: 'inline-block' });
-                gsap.set('.logo-text', { display: 'flex' });
-                gsap.to('.nav-label, .logo-text', {
-                    opacity: 1,
-                    duration: 0.15,
-                    delay: 0.05 // Wait for width transition to start
-                });
-
-                // Animate the toggle icon rotation
-                gsap.to(toggleBtn.querySelector('.material-symbols-outlined'), {
-                    rotation: 0,
-                    duration: 0.15
-                });
             }
             
             // Map Leaflet resize fix if map exists
@@ -73,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => { map.invalidateSize(); }, 160);
             }
         });
-
         // Set initial rotation of toggle button
         if (isCollapsed) {
             gsap.set(toggleBtn.querySelector('.material-symbols-outlined'), { rotation: 180 });

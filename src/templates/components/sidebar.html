@@ -11,29 +11,29 @@
 </div>
 </div>
 <div class="flex flex-col mt-4 space-y-1 px-2">
-<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary border-l-2 border-primary bg-surface-container-highest' if request.endpoint == 'dashboard' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 border-l-2 border-transparent' }}" href="{{ url_for('dashboard') }}">
+<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary rounded-xl bg-surface-container-highest' if request.endpoint == 'dashboard' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-xl' }}" href="{{ url_for('dashboard') }}">
 <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' {{ '1' if request.endpoint == 'dashboard' else '0' }};">dashboard</span>
 <span class="nav-label whitespace-nowrap overflow-hidden">Dashboard</span>
 </a>
-<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary border-l-2 border-primary bg-surface-container-highest' if request.endpoint == 'optimizer' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 border-l-2 border-transparent' }}" href="{{ url_for('optimizer') }}">
+<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary rounded-xl bg-surface-container-highest' if request.endpoint == 'optimizer' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-xl' }}" href="{{ url_for('optimizer') }}">
 <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' {{ '1' if request.endpoint == 'optimizer' else '0' }};">dynamic_form</span>
 <span class="nav-label whitespace-nowrap overflow-hidden">Optimizer</span>
 </a>
-<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary border-l-2 border-primary bg-surface-container-highest' if request.endpoint == 'master_data' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 border-l-2 border-transparent' }}" href="{{ url_for('master_data') }}">
+<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary rounded-xl bg-surface-container-highest' if request.endpoint == 'master_data' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-xl' }}" href="{{ url_for('master_data') }}">
 <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' {{ '1' if request.endpoint == 'master_data' else '0' }};">database</span>
 <span class="nav-label whitespace-nowrap overflow-hidden">Data Hub</span>
 </a>
-<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary border-l-2 border-primary bg-surface-container-highest' if request.endpoint == 'history' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 border-l-2 border-transparent' }}" href="{{ url_for('history') }}">
+<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary rounded-xl bg-surface-container-highest' if request.endpoint == 'history' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-xl' }}" href="{{ url_for('history') }}">
 <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' {{ '1' if request.endpoint == 'history' else '0' }};">history</span>
 <span class="nav-label whitespace-nowrap overflow-hidden">History</span>
 </a>
-<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary border-l-2 border-primary bg-surface-container-highest' if request.endpoint == 'settings' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 border-l-2 border-transparent' }}" href="{{ url_for('settings') }}">
+<a class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps {{ 'text-primary rounded-xl bg-surface-container-highest' if request.endpoint == 'settings' else 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors duration-200 rounded-xl' }}" href="{{ url_for('settings') }}">
 <span class="material-symbols-outlined shrink-0" style="font-variation-settings: 'FILL' {{ '1' if request.endpoint == 'settings' else '0' }};">settings</span>
 <span class="nav-label whitespace-nowrap overflow-hidden">Settings</span>
 </a>
 </div>
 <div class="mt-auto px-2 pb-4">
-<button id="sidebar-toggle" class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-300 border-l-2 border-transparent w-full rounded focus:outline-none">
+<button id="sidebar-toggle" class="nav-link flex items-center gap-3 px-4 py-3 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all duration-300 rounded-xl w-full rounded-xl focus:outline-none">
 <span class="material-symbols-outlined shrink-0" style="font-variation-settings: \'FILL\' 0;">keyboard_double_arrow_left</span>
 <span class="nav-label whitespace-nowrap overflow-hidden">Collapse</span>
 </button>

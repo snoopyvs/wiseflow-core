@@ -53,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('sidebar_collapsed', 'false');
                 
                 // Animate text in
-                gsap.set('.nav-label, .logo-text', { display: 'inline-block' });
+                gsap.set('.nav-label', { display: 'inline-block' });
+                gsap.set('.logo-text', { display: 'flex' });
                 gsap.to('.nav-label, .logo-text', {
                     opacity: 1,
                     duration: 0.15,

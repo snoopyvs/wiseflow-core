@@ -1,3 +1,14 @@
+:root {
+  --sidebar-width: 240px;
+}
+html.sidebar-collapsed {
+  --sidebar-width: 84px;
+}
+
+nav.w-sidebar_width, main.pl-sidebar_width {
+    transition: width 0.15s cubic-bezier(0.4, 0.0, 0.2, 1), padding-left 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
 body { background-color: theme('colors.surface-dim'); color: theme('colors.on-surface'); }
         .card { background-color: theme('colors.surface-container'); border: 1px solid theme('colors.outline-variant'); border-radius: theme('borderRadius.DEFAULT'); }
         .btn-primary { background-color: theme('colors.primary'); color: theme('colors.on-primary'); font-family: theme('fontFamily.label-caps'); font-size: theme('fontSize.label-caps')[0]; font-weight: 700; text-transform: uppercase; padding: 8px 16px; border-radius: theme('borderRadius.DEFAULT'); transition: all 0.2s; }
@@ -13,3 +24,33 @@ body { background-color: theme('colors.surface-dim'); color: theme('colors.on-su
         /* Custom Scrollbar - Hide scrollbar but keep functionality */
         .custom-scrollbar::-webkit-scrollbar { display: none; }
         .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* CSS Fallback for Sidebar Toggle */
+html.sidebar-collapsed .nav-label,
+html.sidebar-collapsed .logo-text {
+  opacity: 0;
+  display: none !important;
+}
+
+html.sidebar-collapsed .nav-link {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+html:not(.sidebar-collapsed) .nav-label,
+html:not(.sidebar-collapsed) .logo-text {
+  opacity: 1;
+}
+
+nav.w-sidebar_width, main.pl-sidebar_width {
+    transition: width 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), padding-left 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+.nav-label, .logo-text {
+    transition: opacity 0.2s ease !important;
+}
+#sidebar-toggle .material-symbols-outlined {
+    transition: transform 0.3s ease !important;
+}
+html.sidebar-collapsed #sidebar-toggle .material-symbols-outlined {
+    transform: rotate(180deg) !important;
+}

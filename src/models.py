@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 from src.extensions import db
+from flask_login import UserMixin
 
-class Partner(db.Model):
+class Partner(UserMixin, db.Model):
     __tablename__ = 'partners'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -9,6 +10,7 @@ class Partner(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     company_name = db.Column(db.String(150), nullable=True)
+    password_last_changed = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     vehicles = db.relationship('Vehicle', backref='partner', lazy=True)

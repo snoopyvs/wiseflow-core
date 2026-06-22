@@ -37,7 +37,7 @@
 <h2 class="font-headline-md text-headline-md text-on-surface mb-stack_sm">Authentication Gateway</h2>
 <p class="font-body-sm text-body-sm text-on-surface-variant">Enter your operational credentials to access the hub.</p>
 </div>
-<form action="#" class="space-y-stack_md" method="POST">
+<form id="login-form" class="space-y-stack_md">
 <!-- Username Input -->
 <div class="space-y-unit">
 <label class="block font-label-caps text-label-caps text-on-surface uppercase" for="username">Operator ID / Email</label>
@@ -45,7 +45,7 @@
 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 <span class="material-symbols-outlined text-on-surface-variant text-[18px]">badge</span>
 </div>
-<input class="block w-full pl-10 pr-3 py-2 bg-[#030712] border border-[#374151] rounded-sm text-on-surface font-body-md focus:ring-1 focus:ring-primary-container focus:border-primary-container placeholder-on-surface-variant/50 transition-colors" id="username" name="username" placeholder="e.g. op_7842" required="" type="text"/>
+<input class="block w-full pl-10 pr-3 py-2 bg-surface border border-outline-variant rounded-DEFAULT text-on-surface font-body-md focus:ring-1 focus:ring-primary focus:border-primary placeholder-on-surface-variant/50 transition-colors" id="username" name="username" placeholder="e.g. op_7842" required="" type="text"/>
 </div>
 </div>
 <!-- Password Input -->
@@ -55,7 +55,10 @@
 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 <span class="material-symbols-outlined text-on-surface-variant text-[18px]">key</span>
 </div>
-<input class="block w-full pl-10 pr-3 py-2 bg-[#030712] border border-[#374151] rounded-sm text-on-surface font-body-md focus:ring-1 focus:ring-primary-container focus:border-primary-container placeholder-on-surface-variant/50 transition-colors" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<input class="block w-full pl-10 pr-10 py-2 bg-surface border border-outline-variant rounded-DEFAULT text-on-surface font-body-md focus:ring-1 focus:ring-primary focus:border-primary placeholder-on-surface-variant/50 transition-colors" id="password" name="password" placeholder="••••••••" required="" type="password"/>
+<button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none" onclick="const input = document.getElementById('password'); const icon = this.querySelector('span'); if (input.type === 'password') { input.type = 'text'; icon.textContent = 'visibility_off'; } else { input.type = 'password'; icon.textContent = 'visibility'; }">
+    <span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
 </div>
 </div>
 <!-- Options Row -->
@@ -63,7 +66,7 @@
 <div class="flex items-center">
 <input class="h-4 w-4 bg-[#030712] border-[#374151] rounded-[2px] text-primary-container focus:ring-primary-container focus:ring-offset-background" id="remember-me" name="remember-me" type="checkbox"/>
 <label class="ml-2 block font-body-sm text-body-sm text-on-surface-variant" for="remember-me">
-                            Maintain Session
+                            Maintain Session (30 Days)
                         </label>
 </div>
 <!-- Recovery Link (Optional, kept minimal) -->
@@ -77,12 +80,42 @@
                         Initiate Session
                         <span class="material-symbols-outlined text-[16px]">login</span>
 </button>
-<button class="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-[#374151] rounded-sm shadow-sm font-label-caps text-label-caps font-bold text-on-surface bg-transparent hover:bg-surface-container-high transition-colors uppercase" type="button">
+<button class="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-outline-variant rounded-DEFAULT shadow-sm font-label-caps text-label-caps font-bold text-on-surface bg-transparent hover:bg-surface-container-high transition-colors uppercase" type="button" onclick="window.location.href='{{ url_for('register') }}'">
                         Request Access Credentials
                     </button>
 </div>
 </form>
 </div>
 </div>
+
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = 'Authenticating...';
+    try {
+        const response = await fetch('{{ url_for("login") }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})
+        });
+        const data = await response.json();
+        if (response.ok) {
+            window.location.href = data.redirect;
+        } else {
+            alert(data.error || 'Login failed');
+            btn.disabled = false;
+            btn.innerHTML = 'Initiate Session <span class="material-symbols-outlined text-[16px]">login</span>';
+        }
+    } catch(err) {
+        alert('An error occurred during login');
+        btn.disabled = false;
+        btn.innerHTML = 'Initiate Session <span class="material-symbols-outlined text-[16px]">login</span>';
+    }
+});
+</script>
 
 {% endblock %}

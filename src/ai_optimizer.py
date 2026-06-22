@@ -20,182 +20,192 @@ def haversine_distance(coord1, coord2):
     
     return R * c
 
-def create_distance_matrix(locations, mode="Balanced"):
+def create_distance_matrix(locations):
     """
-    Membuat matriks jarak antar semua titik lokasi yang ada.
-    locations: list of dict, misal: [{'id': 'depot', 'lat': -6.2, 'lon': 106.8}, ...]
+    Membuat matriks jarak (dalam km) antar semua titik lokasi yang ada.
     """
     n = len(locations)
     matrix = [[0.0 for _ in range(n)] for _ in range(n)]
     for i in range(n):
         for j in range(n):
             if i != j:
-                base_dist = haversine_distance(
+                matrix[i][j] = haversine_distance(
                     (locations[i]['lat'], locations[i].get('lng', locations[i].get('lon'))),
                     (locations[j]['lat'], locations[j].get('lng', locations[j].get('lon')))
                 )
-                
-                # LOGIKA BARU: TOL vs JALAN BIASA (Multi-Objective Optimization)
-                # Kita gunakan pseudo-random untuk menentukan apakah jalur ini ada Tol-nya atau tidak.
-                hash_val = abs(math.sin(locations[i]['lat'] * locations[j].get('lng', locations[j].get('lon'))))
-                is_toll = hash_val > 0.4  # 60% peluang jalur ini adalah jalan Tol
-                
-                if is_toll:
-                    speed_kmh = 80.0  # Kecepatan tinggi
-                    toll_fee = base_dist * 1000  # Ada biaya tol Rp 1000 / km
-                else:
-                    speed_kmh = 40.0  # Kecepatan lambat (jalan biasa/macet)
-                    toll_fee = 0.0    # Gratis
-                    
-                fuel_cost = base_dist * 1500  # Biaya bensin dasar Rp 1500 / km
-                
-                # Kalkulasi Waktu (Jam) dan Biaya (Rupiah)
-                time_hours = base_dist / speed_kmh
-                total_cost_rp = fuel_cost + toll_fee
-                
-                if mode == "Eco":
-                    # ECO: Murni mencari BIAYA TERMURAH (Rupiah). 
-                    # Algoritma akan otomatis menghindari jalan Tol karena ada toll_fee,
-                    # walau akibatnya waktu tempuh (time_hours) jadi lebih lama.
-                    matrix[i][j] = total_cost_rp
-                    
-                elif mode == "Express":
-                    # EXPRESS: Murni mencari WAKTU TERCEPAT (Jam).
-                    # Algoritma akan mencari jalan Tol (80km/h) walau biayanya mahal.
-                    # Kita kalikan 10.000 agar angkanya tidak terlalu kecil untuk dihitung A*
-                    matrix[i][j] = time_hours * 10000 
-                    
-                else:
-                    # BALANCED: Menggabungkan Biaya dan Waktu.
-                    # Asumsi: 1 jam waktu supir berharga Rp 50.000
-                    matrix[i][j] = total_cost_rp + (time_hours * 50000)
-                    
     return matrix
 
-def solve_routing(locations, use_heuristic=True, mode="Balanced"):
+def calculate_fuel_cost(distance_km, current_load_kg, max_capacity_kg, base_efficiency_kml):
     """
-    Fungsi utama untuk mencari rute terpendek mengunjungi semua tujuan (TSP problem).
-    Jika use_heuristic = True  -> Menggunakan Algoritma A*
-    Jika use_heuristic = False -> Menggunakan Algoritma Dijkstra (Uniform Cost Search)
+    Menghitung biaya bensin berdasarkan beban dinamis.
+    Truk penuh (100% load) akan 30% lebih boros bensin dari truk kosong.
+    """
+    if max_capacity_kg <= 0 or base_efficiency_kml <= 0:
+        return 0.0
+        
+    # Pengurangan efisiensi berbanding lurus dengan load (max -30%)
+    load_ratio = min(current_load_kg / max_capacity_kg, 1.0)
+    efficiency_drop = 0.3 * load_ratio
+    actual_efficiency_kml = base_efficiency_kml * (1.0 - efficiency_drop)
+    
+    # Harga bensin (contoh: Biosolar Rp 6.800/L)
+    FUEL_PRICE = 6800.0
+    
+    liters_used = distance_km / actual_efficiency_kml
+    return liters_used * FUEL_PRICE
+
+def solve_routing(locations, capacity_kg, base_fuel_efficiency_kml, use_heuristic=True, mode="Balanced"):
+    """
+    Menyelesaikan Capacitated Vehicle Routing Problem (CVRP)
+    State: (current_node, unvisited_tuple, current_load)
     """
     start_time = time.time()
     nodes_expanded = 0
     
-    # Buat matriks jarak antar titik biar komputasi lebih cepat (tidak ngitung berulang-ulang)
-    dist_matrix = create_distance_matrix(locations, mode)
+    dist_matrix = create_distance_matrix(locations)
     n = len(locations)
     
-    # State direpresentasikan sebagai tuple: (current_node_index, unvisited_nodes_tuple)
-    # Tujuan kita: unvisited_nodes_tuple menjadi kosong.
+    # Ambil data demand tiap lokasi (asumsi index 0 adalah depot dengan demand 0)
+    demands = [float(loc.get('demand', 0)) for loc in locations]
     
-    # Inisialisasi State Awal
-    initial_unvisited = tuple(i for i in range(1, n)) # Depot diasumsikan index 0
+    # Validasi awal: Jika ada 1 barang > kapasitas truk, otomatis error dari API
+    # State awal: (cost_g, current_node, unvisited_tuple, current_load, path_history, total_distance, total_fuel_cost)
+    initial_unvisited = tuple(i for i in range(1, n))
     
-    # Priority Queue untuk nyimpan antrean State yang mau dicek.
-    # Format antrean: (f_cost, g_cost, current_node, unvisited_tuple, path_history)
+    # Priority queue format: (f_cost, g_cost, current_node, unvisited_tuple, current_load, path, total_dist, total_fuel)
     pq = []
+    heapq.heappush(pq, (0.0, 0.0, 0, initial_unvisited, 0.0, [0], 0.0, 0.0))
     
-    # g(n) awal adalah 0 karena kita baru mulai dari depot
-    heapq.heappush(pq, (0.0, 0.0, 0, initial_unvisited, [0]))
-    
-    # Dictionary buat nyimpen cost terkecil untuk suatu state biar gak ngecek ulang state yang sama
     best_g = {}
-    best_g[(0, initial_unvisited)] = 0.0
+    best_g[(0, initial_unvisited, 0.0)] = 0.0
     
     best_path = []
     min_cost = float('inf')
+    final_distance = 0.0
+    final_fuel = 0.0
     
     while pq:
-        # Ambil state dengan f_cost paling kecil dari antrean
-        f_cost, g_cost, curr, unvisited, path = heapq.heappop(pq)
+        f_cost, g_cost, curr, unvisited, current_load, path, total_dist, total_fuel = heapq.heappop(pq)
         nodes_expanded += 1
         
-        # Jika semua titik sudah dikunjungi (unvisited kosong)
+        # Goal Check: Jika semua node sudah dikunjungi
         if not unvisited:
-            # Karena ini logistik, mungkin kita perlu hitung jarak kembali ke depot (index 0)
-            # Di sini kita asumsikan rute selesai di titik terakhir (tidak wajib balik depot).
+            # Opsional: Paksa balik ke depot di akhir?
+            # CVRP biasanya wajib balik ke depot. Kita tambahkan perjalanan pulang ke depot (node 0)
+            if curr != 0:
+                dist_to_depot = dist_matrix[curr][0]
+                fuel_to_depot = calculate_fuel_cost(dist_to_depot, current_load, capacity_kg, base_fuel_efficiency_kml)
+                
+                step_cost = 0.0
+                if mode == "Eco": step_cost = fuel_to_depot
+                elif mode == "Express": step_cost = dist_to_depot
+                else: step_cost = fuel_to_depot + (dist_to_depot * 2000) # Balanced
+                
+                g_cost += step_cost
+                total_dist += dist_to_depot
+                total_fuel += fuel_to_depot
+                path = list(path)
+                path.append(0)
+            
             if g_cost < min_cost:
                 min_cost = g_cost
                 best_path = path
-            break # Berhenti karena algoritma A*/Dijkstra pasti nemu yang paling optimal pertama kali
+                final_distance = total_dist
+                final_fuel = total_fuel
+            break # Ketemu solusi optimal
             
-        # Jika bukan yang tercepat untuk state ini, skip aja (Pruning)
-        if g_cost > best_g.get((curr, unvisited), float('inf')):
+        # Pruning
+        if g_cost > best_g.get((curr, unvisited, current_load), float('inf')):
             continue
             
-        # Ekspansi / cari cabang ke titik selanjutnya
-        for nxt in unvisited:
-            # Hitung jarak/cost riil dari titik saat ini ke titik berikutnya
-            # (Cost ini sudah dimodifikasi oleh Mode Operasi di fungsi create_distance_matrix)
-            step_cost = dist_matrix[curr][nxt]
+        # Aksi 1: Kembali ke Depot (hanya relevan jika kita tidak di depot dan muatan > 0)
+        if curr != 0 and current_load > 0:
+            dist_to_depot = dist_matrix[curr][0]
+            fuel_to_depot = calculate_fuel_cost(dist_to_depot, current_load, capacity_kg, base_fuel_efficiency_kml)
             
-            # Perhitungan g(n) baru
+            step_cost = 0.0
+            if mode == "Eco": step_cost = fuel_to_depot
+            elif mode == "Express": step_cost = dist_to_depot
+            else: step_cost = fuel_to_depot + (dist_to_depot * 2000) # Balanced
+            
             new_g = g_cost + step_cost
+            new_state_key = (0, unvisited, 0.0) # Load reset ke 0
             
-            # Bikin state unvisited baru (hapus titik yang barusan dikunjungi)
+            if new_g < best_g.get(new_state_key, float('inf')):
+                best_g[new_state_key] = new_g
+                new_path = list(path)
+                new_path.append(0)
+                
+                # Heuristic: jarak dari depot ke nearest unvisited
+                h_cost = 0.0
+                if use_heuristic and unvisited:
+                    nearest = min(dist_matrix[0][u] for u in unvisited)
+                    if mode == "Eco":
+                        # Truk asumsikan kosong
+                        h_cost = calculate_fuel_cost(nearest, 0.0, capacity_kg, base_fuel_efficiency_kml)
+                    elif mode == "Express":
+                        h_cost = nearest
+                    else:
+                        h_cost = calculate_fuel_cost(nearest, 0.0, capacity_kg, base_fuel_efficiency_kml) + (nearest * 2000)
+                
+                heapq.heappush(pq, (new_g + h_cost, new_g, 0, unvisited, 0.0, new_path, total_dist + dist_to_depot, total_fuel + fuel_to_depot))
+
+        # Aksi 2: Lanjut ke tujuan berikutnya
+        for nxt in unvisited:
+            demand_nxt = demands[nxt]
+            
+            # CEK CONSTRAINT KAPASITAS
+            if current_load + demand_nxt > capacity_kg:
+                # Tidak bisa langsung pergi, skip (Aksi 1 akan handle perjalanan ke depot)
+                continue
+                
+            dist_to_nxt = dist_matrix[curr][nxt]
+            fuel_to_nxt = calculate_fuel_cost(dist_to_nxt, current_load, capacity_kg, base_fuel_efficiency_kml)
+            
+            step_cost = 0.0
+            if mode == "Eco": step_cost = fuel_to_nxt
+            elif mode == "Express": step_cost = dist_to_nxt
+            else: step_cost = fuel_to_nxt + (dist_to_nxt * 2000)
+            
+            new_g = g_cost + step_cost
+            new_load = current_load + demand_nxt
             new_unvisited = tuple(u for u in unvisited if u != nxt)
             
-            # Jika cost baru lebih kecil dari yang pernah dicatat, masukan ke antrean
-            if new_g < best_g.get((nxt, new_unvisited), float('inf')):
-                best_g[(nxt, new_unvisited)] = new_g
-                
-                # PERHITUNGAN HEURISTIK h(n) UNTUK A*
-                h_cost = 0.0
-                if use_heuristic and new_unvisited:
-                    # Rumus Heuristik Admissible (Tidak boleh melebihi cost asli):
-                    # Kita cari jarak lurus (Haversine) terdekat ke titik yang belum dikunjungi.
-                    # Karena bobot (g_cost) sekarang berbeda tiap mode, h_cost juga HARUS menyesuaikan unitnya!
-                    nearest_dist_km = float('inf')
-                    for u in new_unvisited:
-                        # Hitung haversine murni
-                        d = haversine_distance(
-                            (locations[nxt]['lat'], locations[nxt].get('lng', locations[nxt].get('lon'))),
-                            (locations[u]['lat'], locations[u].get('lng', locations[u].get('lon')))
-                        )
-                        if d < nearest_dist_km: nearest_dist_km = d
-                        
-                    if mode == "Eco":
-                        # Di Eco, cost adalah Rupiah. Cost minimal per km adalah 1500 (tanpa tol).
-                        h_cost = nearest_dist_km * 1500
-                    elif mode == "Express":
-                        # Di Express, cost adalah Waktu * 10000. Kecepatan maksimal adalah 80km/h.
-                        # Waktu minimal = Jarak / 80.
-                        h_cost = (nearest_dist_km / 80.0) * 10000
-                    else: # Balanced
-                        # Cost minimal = Bensin tanpa tol + Waktu ngebut (Jarak/80 * 50000)
-                        h_cost = nearest_dist_km * 1500 + ((nearest_dist_km / 80.0) * 50000)
-                
-                # Fungsi f(n) = g(n) + h(n)
-                # Jika Dijkstra (use_heuristic=False), maka h_cost = 0, sehingga f(n) = g(n) (Uniform Cost Search)
-                new_f = new_g + h_cost
-                
-                # Masukkan state baru ke Priority Queue
+            new_state_key = (nxt, new_unvisited, new_load)
+            
+            if new_g < best_g.get(new_state_key, float('inf')):
+                best_g[new_state_key] = new_g
                 new_path = list(path)
                 new_path.append(nxt)
-                heapq.heappush(pq, (new_f, new_g, nxt, new_unvisited, new_path))
                 
+                h_cost = 0.0
+                if use_heuristic and new_unvisited:
+                    nearest = min(dist_matrix[nxt][u] for u in new_unvisited)
+                    if mode == "Eco":
+                        h_cost = calculate_fuel_cost(nearest, new_load, capacity_kg, base_fuel_efficiency_kml)
+                    elif mode == "Express":
+                        h_cost = nearest
+                    else:
+                        h_cost = calculate_fuel_cost(nearest, new_load, capacity_kg, base_fuel_efficiency_kml) + (nearest * 2000)
+                
+                heapq.heappush(pq, (new_g + h_cost, new_g, nxt, new_unvisited, new_load, new_path, total_dist + dist_to_nxt, total_fuel + fuel_to_nxt))
+
     execution_time_ms = (time.time() - start_time) * 1000
     
     # Susun ulang data rute hasil akhir
     route_details = []
-    for idx in best_path:
-        route_details.append(locations[idx])
-        
-    # Untuk display frontend, kita tetep butuh hitung Jarak Asli (km) dari best_path
-    total_real_distance = 0.0
-    for i in range(len(best_path) - 1):
-        idx_a = best_path[i]
-        idx_b = best_path[i+1]
-        total_real_distance += haversine_distance(
-            (locations[idx_a]['lat'], locations[idx_a].get('lng', locations[idx_a].get('lon'))),
-            (locations[idx_b]['lat'], locations[idx_b].get('lng', locations[idx_b].get('lon')))
-        )
-        
+    if best_path:
+        for idx in best_path:
+            # Karena bisa mampir depot berkali-kali, kita butuh clone dict lokasinya
+            loc_data = locations[idx].copy()
+            route_details.append(loc_data)
+            
     return {
         "algorithm": "A*" if use_heuristic else "Dijkstra",
         "route_indices": best_path,
         "route_locations": route_details,
-        "total_distance_km": round(total_real_distance, 2),
+        "total_distance_km": round(final_distance, 2),
+        "total_fuel_cost_rp": round(final_fuel, 2),
         "nodes_expanded": nodes_expanded,
         "execution_time_ms": round(execution_time_ms, 2)
     }

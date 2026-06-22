@@ -1,0 +1,37 @@
+<div class="relative z-50">
+    <button onclick="toggleProfileMenu(event)" class="hover:text-primary transition-colors p-1 focus:outline-none flex items-center justify-center rounded">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+    </button>
+    <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-56 bg-surface-container border border-outline-variant rounded shadow-lg overflow-hidden flex-col">
+        <div class="px-4 py-3 border-b border-outline-variant">
+            <p class="font-label-caps text-label-caps text-on-surface truncate">{{ current_user.company_name if current_user.is_authenticated else 'Guest' }}</p>
+            <p class="font-body-sm text-xs text-on-surface-variant truncate">{{ current_user.email if current_user.is_authenticated else '' }}</p>
+        </div>
+        <a href="{{ url_for('settings') }}" class="px-4 py-2 font-body-sm text-body-sm text-on-surface hover:bg-surface-container-high transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">settings</span> Settings
+        </a>
+        <a href="{{ url_for('logout') }}" class="px-4 py-2 font-body-sm text-body-sm text-[#ef4444] hover:bg-[#ef4444]/10 transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">logout</span> Sign Out
+        </a>
+    </div>
+</div>
+<script>
+    function toggleProfileMenu(event) {
+        event.stopPropagation();
+        const menu = document.getElementById('profile-dropdown-menu');
+        if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+            menu.classList.add('flex');
+        } else {
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+        }
+    }
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('profile-dropdown-menu');
+        if (menu && !menu.classList.contains('hidden')) {
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+        }
+    });
+</script>

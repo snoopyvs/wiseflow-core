@@ -19,15 +19,13 @@
         <h2 class="font-headline-md text-headline-md text-on-surface">Route Optimization Configuration</h2>
     </div>
     <div class="flex items-center gap-4 text-on-surface-variant">
-        <button class="hover:bg-surface-container-lowest transition-all hover:scale-95 hover:opacity-80 p-1 rounded">
-            <span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
-        </button>
+        {% include 'components/profile_dropdown.html' %}
     </div>
 </header>
 <!-- Split Layout Wrapper -->
 <div class="flex-1 flex overflow-hidden">
-<!-- Left Input Panel (35%) -->
-<section class="w-[35%] min-w-[320px] max-w-[480px] border-r border-outline-variant bg-surface-container-low flex flex-col h-full z-30">
+<!-- Left Input Panel -->
+<section id="left-panel" style="width: 35%;" class="min-w-[320px] max-w-[500px] border-r border-outline-variant bg-surface-container-low flex flex-col h-full z-30">
 <div class="p-3 border-b border-outline-variant bg-surface-container flex justify-between items-center shrink-0">
     <span class="px-2 py-1 bg-surface-container-highest border border-outline-variant rounded font-data-mono text-data-mono text-on-surface-variant text-[10px]">SESSION ID: 89A-XQ2</span>
     <button onclick="location.reload()" class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container-high text-on-surface-variant transition-colors border border-transparent hover:border-outline-variant" title="Refresh Page">
@@ -44,9 +42,9 @@
 <div class="relative">
 <select id="vehicle-select" class="w-full bg-[#030712] border border-outline-variant rounded px-3 py-2 text-on-surface font-body-md appearance-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors">
 {% for v in vehicles %}
-<option value="{{ v.id }}" data-fuel="{{ v.fuel_efficiency_kml }}">{{ v.model }} ({{ v.capacity_kg }} kg)</option>
+<option value="{{ v.id }}" data-fuel="{{ v.fuel_efficiency_kml }}" data-capacity="{{ v.capacity_kg }}">{{ v.model }} ({{ v.capacity_kg }} kg)</option>
 {% else %}
-<option value="" data-fuel="10">No vehicles available</option>
+<option value="" data-fuel="10" data-capacity="0">No vehicles available</option>
 {% endfor %}
 </select>
 <span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant pointer-events-none" data-icon="expand_more">expand_more</span>
@@ -123,8 +121,15 @@
 </button>
 </div>
 </section>
+
+<!-- Resizer -->
+<div id="resizer" class="w-1 bg-outline-variant hover:bg-primary cursor-col-resize z-40 transition-colors flex flex-col items-center justify-center relative group shrink-0">
+    <div class="absolute w-4 h-full cursor-col-resize z-50"></div>
+    <div class="w-1 h-8 bg-on-surface-variant rounded-full group-hover:bg-[#000000] transition-colors"></div>
+</div>
+
 <!-- Right Workspace (65%) -->
-<section class="flex-1 flex flex-col relative map-bg">
+<section class="flex-1 flex flex-col relative map-bg min-w-0">
 <!-- Overlay Summary Box -->
 <button type="button" id="toggle-metrics-btn" class="absolute top-container_padding right-container_padding w-10 h-10 bg-surface-container-high border border-outline-variant rounded flex items-center justify-center text-on-surface hover:text-primary transition-colors z-30 shadow-md">
 <span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
@@ -164,7 +169,7 @@
 <!-- Real Map Container -->
 <div id="map" class="absolute inset-0 z-0"></div>
 <!-- Bottom Timeline Workspace -->
-<div class="mt-auto bg-surface-container border-t border-outline-variant z-20">
+<div class="mt-auto bg-surface-container border-t border-outline-variant z-20 w-full overflow-hidden">
 <div class="p-3 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
 <span class="font-label-caps text-label-caps text-on-surface-variant">Routing Timeline</span>
 <button type="button" id="expand-timeline-btn" class="text-primary font-label-caps text-label-caps flex items-center gap-1 hover:text-primary-fixed transition-colors">
@@ -276,11 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
-    // Colorful Dark Mode: Standard OSM tiles + CSS invert trick
+    // Light Mode: Standard OSM tiles
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-        className: 'dark-map-tiles' // CSS class applies invert filter
+        maxZoom: 19
     }).addTo(map);
 
     // ===== 2. STARTING POINT AUTOCOMPLETE =====
@@ -360,8 +364,20 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => { destInput.style.borderColor = ''; }, 1000);
             return;
         }
-        const demand = demandInput.value.trim() || '0';
-        addDestinationToUI(pendingDest.name, pendingDest.lat, pendingDest.lng, demand);
+        const demandVal = parseFloat(demandInput.value.trim() || '0');
+        
+        // Frontend Validation: Check against selected vehicle capacity
+        const vehicleSelect = document.getElementById('vehicle-select');
+        const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+        if (selectedOption && selectedOption.dataset.capacity) {
+            const maxCap = parseFloat(selectedOption.dataset.capacity);
+            if (demandVal > maxCap) {
+                alert(`Tidak bisa ditambahkan! Berat barang (${demandVal} kg) melebihi kapasitas maksimal truk yang dipilih (${maxCap} kg).`);
+                return;
+            }
+        }
+        
+        addDestinationToUI(pendingDest.name, pendingDest.lat, pendingDest.lng, demandVal);
         destInput.value = '';
         demandInput.value = '';
         pendingDest = null;
@@ -534,22 +550,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 routeLines.forEach(line => map.removeLayer(line));
                 routeLines = [];
 
-                const latlngs = data.astar.route_locations.map(loc => [loc.lat, loc.lng]);
+                const routeLocs = data.astar.route_locations;
                 
-                // Draw A* path (Green/Gold gradient simulation)
-                const polyline = L.polyline(latlngs, {
-                    color: '#f59e0b',
-                    weight: 4,
-                    opacity: 0.8,
-                    dashArray: '10, 10',
-                    lineJoin: 'round'
-                }).addTo(map);
-                routeLines.push(polyline);
+                // Helper to fetch real road from OSRM
+                async function fetchRealRoute(loc1, loc2) {
+                    const url = `https://router.project-osrm.org/route/v1/driving/${loc1.lng},${loc1.lat};${loc2.lng},${loc2.lat}?overview=full&geometries=geojson`;
+                    try {
+                        const res = await fetch(url);
+                        const rData = await res.json();
+                        if (rData.code === 'Ok' && rData.routes.length > 0) {
+                            // Convert GeoJSON [lng, lat] to Leaflet [lat, lng]
+                            return rData.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                        }
+                    } catch (e) {
+                        console.error("OSRM fetch error:", e);
+                    }
+                    // Fallback to straight line
+                    return [[loc1.lat, loc1.lng], [loc2.lat, loc2.lng]];
+                }
 
-                // 3. Zoom Map to Fit Route (The user's requested feature)
-                // Get bounds of the drawn polyline
-                const routeBounds = polyline.getBounds();
+                // Beautiful gradient of colors for each leg to distinguish overlapping routes
+                const colors = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#f97316', '#14b8a6'];
+                let routeBounds = L.latLngBounds();
                 
+                // Draw path leg by leg
+                for (let i = 0; i < routeLocs.length - 1; i++) {
+                    const legCoords = await fetchRealRoute(routeLocs[i], routeLocs[i+1]);
+                    const color = colors[i % colors.length];
+                    
+                    const polyline = L.polyline(legCoords, {
+                        color: color,
+                        weight: 6,
+                        opacity: 0.9,
+                        lineJoin: 'round'
+                    }).addTo(map);
+                    
+                    // Add a tooltip to show the order of the segment
+                    polyline.bindTooltip(`<b>Rute ke-${i+1}</b><br>${routeLocs[i].name} &rarr; ${routeLocs[i+1].name}`, {
+                        sticky: true,
+                        className: 'font-body-sm'
+                    });
+                    
+                    routeLines.push(polyline);
+                    legCoords.forEach(coord => routeBounds.extend(coord));
+                }
+
+                // 3. Zoom Map to Fit Route
                 // Ensure starting point is also in bounds (just in case)
                 routeBounds.extend([startPoint.lat, startPoint.lng]);
                 
@@ -573,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const timeStr = currentTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                         
                         const nodeEl = document.createElement('div');
-                        nodeEl.className = `flex-shrink-0 w-48 border rounded p-3 relative ${isStart ? 'bg-[#030712] border-outline-variant' : 'bg-[#1F2937] border-primary'}`;
+                        nodeEl.className = `flex-shrink-0 w-48 border rounded p-3 relative select-none ${isStart ? 'bg-[#030712] border-outline-variant' : 'bg-[#1F2937] border-primary'}`;
                         nodeEl.innerHTML = `
                             <div class="absolute -top-1.5 -left-1.5 w-3 h-3 rounded-full ${isStart ? 'bg-on-surface' : 'bg-primary'}"></div>
                             <p class="font-label-caps text-label-caps mb-1 ${isStart ? 'text-on-surface-variant' : 'text-primary'}">${isStart ? 'START' : `STOP 0${index}`}</p>
@@ -594,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             currentTime.setMinutes(currentTime.getMinutes() + Math.round(distKm * 3) + 10);
                             
                             const lineEl = document.createElement('div');
-                            lineEl.className = "flex-shrink-0 flex flex-col justify-center px-2";
+                            lineEl.className = "flex-shrink-0 flex flex-col justify-center px-2 select-none";
                             lineEl.innerHTML = `
                                 <span class="font-data-mono text-[10px] text-secondary mb-1">${distKm}km</span>
                                 <div class="w-8 h-px bg-[#00a572] relative">
@@ -603,6 +649,33 @@ document.addEventListener('DOMContentLoaded', () => {
                             `;
                             timelineContainer.appendChild(lineEl);
                         }
+                    });
+                    
+                    // Add mouse drag-to-scroll logic to timeline
+                    let isDown = false;
+                    let startX;
+                    let scrollLeft;
+                    
+                    timelineContainer.addEventListener('mousedown', (e) => {
+                        isDown = true;
+                        timelineContainer.classList.add('cursor-grabbing');
+                        startX = e.pageX - timelineContainer.offsetLeft;
+                        scrollLeft = timelineContainer.scrollLeft;
+                    });
+                    timelineContainer.addEventListener('mouseleave', () => {
+                        isDown = false;
+                        timelineContainer.classList.remove('cursor-grabbing');
+                    });
+                    timelineContainer.addEventListener('mouseup', () => {
+                        isDown = false;
+                        timelineContainer.classList.remove('cursor-grabbing');
+                    });
+                    timelineContainer.addEventListener('mousemove', (e) => {
+                        if (!isDown) return;
+                        e.preventDefault();
+                        const x = e.pageX - timelineContainer.offsetLeft;
+                        const walk = (x - startX) * 2; // scroll-fast multiplier
+                        timelineContainer.scrollLeft = scrollLeft - walk;
                     });
                 }
 
@@ -617,6 +690,48 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // ===== 8. RESIZABLE PANEL =====
+    const resizer = document.getElementById('resizer');
+    const leftPanel = document.getElementById('left-panel');
+    let isResizing = false;
+
+    if (resizer && leftPanel) {
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            leftPanel.style.transition = 'none'; // Prevent any CSS transitions from causing blinks
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            // Calculate relative to the parent container to account for the global sidebar
+            const containerLeft = leftPanel.parentElement.getBoundingClientRect().left;
+            const newWidth = e.clientX - containerLeft;
+            leftPanel.style.width = `${newWidth}px`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = 'default';
+                document.body.style.userSelect = 'auto';
+                leftPanel.style.transition = '';
+                if (map) map.invalidateSize();
+            }
+        });
+    }
+
+    // ===== 9. UNSAVED CHANGES WARNING =====
+    // Warn user before leaving if they have inputted any data
+    window.addEventListener('beforeunload', (e) => {
+        if (startPoint !== null || destinations.length > 0) {
+            e.preventDefault();
+            e.returnValue = ''; // Required for Chrome and modern browsers to show the default warning
+        }
+    });
+
 });
 </script>
 

@@ -31,6 +31,12 @@ html.sidebar-collapsed .logo-text {
   display: none !important;
 }
 
+html.sidebar-collapsed .nav-link {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
 html:not(.sidebar-collapsed) .nav-label,
 html:not(.sidebar-collapsed) .logo-text {
   opacity: 1;

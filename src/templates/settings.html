@@ -13,9 +13,7 @@
 <h2 class="font-headline-md text-headline-md text-on-surface">Account &amp; Utility Settings</h2>
 </div>
 <div class="flex items-center gap-4 text-on-surface-variant">
-<button aria-label="account_circle" class="hover:bg-surface-container-lowest transition-all hover:scale-95 hover:opacity-80 rounded p-1">
-<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
-</button>
+{% include 'components/profile_dropdown.html' %}
 </div>
 </header>
 
@@ -31,26 +29,69 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 <div class="space-y-1">
 <label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Partner Organization</label>
-<input class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="text" value="Apex Logistics Global"/>
+<input id="profile-company" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="text" value="{{ current_user.company_name }}"/>
 </div>
 <div class="space-y-1">
-<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Operational Region</label>
-<select class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer">
-<option>US-EAST (N. Virginia)</option>
-<option>US-WEST (Oregon)</option>
-<option>EU-CENTRAL (Frankfurt)</option>
-<option selected>APAC (Jakarta)</option>
-</select>
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Administrative Contact Email</label>
+<input id="profile-email" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="email" value="{{ current_user.email }}"/>
 </div>
 <div class="space-y-1 md:col-span-2">
-<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Administrative Contact Email</label>
-<input class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="email" value="sysadmin@apexlogistics.io"/>
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block text-[#f59e0b]">Current Password (Required to save changes)</label>
+<div class="relative">
+    <input id="profile-password" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all pr-10" type="password" placeholder="••••••••"/>
+    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none" onclick="const input = document.getElementById('profile-password'); const icon = this.querySelector('span'); if (input.type === 'password') { input.type = 'text'; icon.textContent = 'visibility_off'; } else { input.type = 'password'; icon.textContent = 'visibility'; }">
+        <span class="material-symbols-outlined text-[18px]">visibility</span>
+    </button>
 </div>
+</div>
+</div>
+<div class="mt-6 flex justify-end">
+<button id="btn-save-profile" class="px-4 py-2 bg-surface-container-high border border-[#4B5563] text-on-surface font-label-caps text-label-caps rounded hover:bg-[#374151] transition-colors" onclick="saveProfile()">Save Profile</button>
+</div>
+</section>
+
+<!-- Section: Security & Password -->
+<section class="bg-[#1F2937] border border-[#4B5563] rounded p-6 mt-8" id="security-settings">
+<div class="flex items-center gap-3 mb-6 border-b border-[#374151] pb-4">
+<span class="material-symbols-outlined text-[#ef4444]" data-icon="lock">lock</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Security & Password</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-1 md:col-span-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Current Password</label>
+<div class="relative">
+    <input id="pwd-current" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-[#ef4444] focus:ring-1 focus:ring-[#ef4444] outline-none transition-all pr-10" type="password" placeholder="••••••••"/>
+    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-[#ef4444] transition-colors focus:outline-none" onclick="const input = document.getElementById('pwd-current'); const icon = this.querySelector('span'); if (input.type === 'password') { input.type = 'text'; icon.textContent = 'visibility_off'; } else { input.type = 'password'; icon.textContent = 'visibility'; }">
+        <span class="material-symbols-outlined text-[18px]">visibility</span>
+    </button>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">New Password</label>
+<div class="relative">
+    <input id="pwd-new" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-[#ef4444] focus:ring-1 focus:ring-[#ef4444] outline-none transition-all pr-10" type="password" placeholder="••••••••"/>
+    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-[#ef4444] transition-colors focus:outline-none" onclick="const input = document.getElementById('pwd-new'); const icon = this.querySelector('span'); if (input.type === 'password') { input.type = 'text'; icon.textContent = 'visibility_off'; } else { input.type = 'password'; icon.textContent = 'visibility'; }">
+        <span class="material-symbols-outlined text-[18px]">visibility</span>
+    </button>
+</div>
+</div>
+<div class="space-y-1">
+<label class="font-label-caps text-label-caps text-on-surface-variant uppercase block">Confirm New Password</label>
+<div class="relative">
+    <input id="pwd-confirm" class="w-full bg-[#030712] border border-[#374151] text-on-surface font-data-mono text-data-mono rounded p-2 focus:border-[#ef4444] focus:ring-1 focus:ring-[#ef4444] outline-none transition-all pr-10" type="password" placeholder="••••••••"/>
+    <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-[#ef4444] transition-colors focus:outline-none" onclick="const input = document.getElementById('pwd-confirm'); const icon = this.querySelector('span'); if (input.type === 'password') { input.type = 'text'; icon.textContent = 'visibility_off'; } else { input.type = 'password'; icon.textContent = 'visibility'; }">
+        <span class="material-symbols-outlined text-[18px]">visibility</span>
+    </button>
+</div>
+</div>
+</div>
+<div class="mt-6 flex justify-end">
+<button id="btn-save-password" class="px-4 py-2 bg-[#ef4444] text-white font-label-caps text-label-caps rounded hover:opacity-90 transition-opacity" onclick="savePassword()">Change Password</button>
 </div>
 </section>
 
 <!-- Section: Optimization Preferences -->
-<section class="bg-[#1F2937] border border-[#4B5563] rounded p-6" id="routing-preferences">
+<section class="bg-[#1F2937] border border-[#4B5563] rounded p-6 mt-8" id="routing-preferences">
 <div class="flex items-center gap-3 mb-6 border-b border-[#374151] pb-4">
 <span class="material-symbols-outlined text-primary" data-icon="route">route</span>
 <h2 class="font-headline-md text-headline-md text-on-surface">Optimization Preferences</h2>
@@ -138,6 +179,67 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('default-mode').addEventListener('change', checkChanges);
     document.getElementById('default-vehicle').addEventListener('change', checkChanges);
 });
+
+async function saveProfile() {
+    const company_name = document.getElementById('profile-company').value;
+    const email = document.getElementById('profile-email').value;
+    const password = document.getElementById('profile-password').value;
+    if (!password) {
+        alert("Please enter your current password to save profile changes.");
+        return;
+    }
+    
+    try {
+        const response = await fetch('{{ url_for("update_profile") }}', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({company_name, email, password})
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert("Profile updated successfully!");
+            document.getElementById('profile-password').value = '';
+        } else {
+            alert(data.error || "Failed to update profile");
+        }
+    } catch(err) {
+        alert("An error occurred");
+    }
+}
+
+async function savePassword() {
+    const current_password = document.getElementById('pwd-current').value;
+    const new_password = document.getElementById('pwd-new').value;
+    const confirm_password = document.getElementById('pwd-confirm').value;
+    
+    if (!current_password || !new_password || !confirm_password) {
+        alert("Please fill in all password fields.");
+        return;
+    }
+    if (new_password !== confirm_password) {
+        alert("New password and confirm password do not match.");
+        return;
+    }
+    
+    try {
+        const response = await fetch('{{ url_for("update_password") }}', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({current_password, new_password})
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert("Password changed successfully!");
+            document.getElementById('pwd-current').value = '';
+            document.getElementById('pwd-new').value = '';
+            document.getElementById('pwd-confirm').value = '';
+        } else {
+            alert(data.error || "Failed to change password");
+        }
+    } catch(err) {
+        alert("An error occurred");
+    }
+}
 
 function saveSettings() {
     localStorage.setItem('max_stops', document.getElementById('max-stops').value);

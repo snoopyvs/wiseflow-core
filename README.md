@@ -110,7 +110,7 @@ Ensure your machine has **Python (version 3.8 or higher)** and **Git** installed
 4. **Environment Variables (.env)**
    Create a new file named `.env` in the root folder (`wiseflow-core/`) and add the following Flask credential:
    ```env
-   SECRET_KEY=
+   SECRET_KEY=tugas-ai-wiseflow-rahasia
    ```
 
 5. **Initialize the Database**

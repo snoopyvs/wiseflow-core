@@ -121,7 +121,9 @@ def solve_routing(locations, capacity_kg, base_fuel_efficiency_kml, use_heuristi
         # Aksi 1: Kembali ke Depot (hanya relevan jika kita tidak di depot dan muatan > 0)
         if curr != 0 and current_load > 0:
             dist_to_depot = dist_matrix[curr][0]
-            fuel_to_depot = calculate_fuel_cost(dist_to_depot, current_load, capacity_kg, base_fuel_efficiency_kml)
+            # [LOGIKA DISTRIBUSI]: Truk sisa muatan saat pulang = kapasitas penuh dikurangi barang yang sudah didrop
+            physical_truck_weight = capacity_kg - current_load
+            fuel_to_depot = calculate_fuel_cost(dist_to_depot, physical_truck_weight, capacity_kg, base_fuel_efficiency_kml)
             
             step_cost = 0.0
             if mode == "Eco": step_cost = fuel_to_depot
@@ -141,12 +143,12 @@ def solve_routing(locations, capacity_kg, base_fuel_efficiency_kml, use_heuristi
                 if use_heuristic and unvisited:
                     nearest = min(dist_matrix[0][u] for u in unvisited)
                     if mode == "Eco":
-                        # Truk asumsikan kosong
-                        h_cost = calculate_fuel_cost(nearest, 0.0, capacity_kg, base_fuel_efficiency_kml)
+                        # Truk asumsikan penuh saat keluar dari depot lagi
+                        h_cost = calculate_fuel_cost(nearest, capacity_kg, capacity_kg, base_fuel_efficiency_kml)
                     elif mode == "Express":
                         h_cost = nearest
                     else:
-                        h_cost = calculate_fuel_cost(nearest, 0.0, capacity_kg, base_fuel_efficiency_kml) + (nearest * 2000)
+                        h_cost = calculate_fuel_cost(nearest, capacity_kg, capacity_kg, base_fuel_efficiency_kml) + (nearest * 2000)
                 
                 heapq.heappush(pq, (new_g + h_cost, new_g, 0, unvisited, 0.0, new_path, total_dist + dist_to_depot, total_fuel + fuel_to_depot))
 
@@ -160,7 +162,10 @@ def solve_routing(locations, capacity_kg, base_fuel_efficiency_kml, use_heuristi
                 continue
                 
             dist_to_nxt = dist_matrix[curr][nxt]
-            fuel_to_nxt = calculate_fuel_cost(dist_to_nxt, current_load, capacity_kg, base_fuel_efficiency_kml)
+            
+            # [LOGIKA DISTRIBUSI]: Truk muatan berkurang seiring berjalan
+            physical_truck_weight = capacity_kg - current_load
+            fuel_to_nxt = calculate_fuel_cost(dist_to_nxt, physical_truck_weight, capacity_kg, base_fuel_efficiency_kml)
             
             step_cost = 0.0
             if mode == "Eco": step_cost = fuel_to_nxt

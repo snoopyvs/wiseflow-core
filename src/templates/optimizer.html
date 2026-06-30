@@ -573,16 +573,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 const colors = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#ef4444', '#f97316', '#14b8a6'];
                 let routeBounds = L.latLngBounds();
                 
+                // Add CSS for moving route animation (if not exists)
+                if (!document.getElementById('route-animation-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'route-animation-style';
+                    style.innerHTML = `
+                        .animated-route {
+                            animation: dash-flow 30s linear infinite;
+                        }
+                        @keyframes dash-flow {
+                            to { stroke-dashoffset: -1000; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
                 // Draw path leg by leg
                 for (let i = 0; i < routeLocs.length - 1; i++) {
                     const legCoords = await fetchRealRoute(routeLocs[i], routeLocs[i+1]);
                     const color = colors[i % colors.length];
                     
+                    // [SOLUSI OVERLAP]: Ketebalan dinamis. Rute pertama tebal (8), makin lama makin tipis (min 3)
+                    // Sehingga kalau numpuk, garis tipis terbaru akan berada di atas garis tebal lama (terlihat seperti kabel bersarang)
+                    const dynamicWeight = Math.max(9 - (i * 1.5), 3);
+                    
                     const polyline = L.polyline(legCoords, {
                         color: color,
-                        weight: 6,
-                        opacity: 0.9,
-                        lineJoin: 'round'
+                        weight: dynamicWeight,
+                        opacity: 1.0,
+                        lineJoin: 'round',
+                        dashArray: '15, 15', // Garis putus-putus
+                        className: 'animated-route' // Animasi jalan
                     }).addTo(map);
                     
                     // Add a tooltip to show the order of the segment
@@ -595,7 +616,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     legCoords.forEach(coord => routeBounds.extend(coord));
                 }
 
-                // 3. Zoom Map to Fit Route
+                // 3. Update Marker Numbers Based on Route Order
+                let stopOrder = 1;
+                const destMap = new Map();
+                destinations.forEach((d, idx) => {
+                    destMap.set(`${d.lat},${d.lng}`, idx);
+                });
+
+                routeLocs.forEach((loc) => {
+                    const key = `${loc.lat},${loc.lng}`;
+                    if (destMap.has(key)) {
+                        const originalIdx = destMap.get(key);
+                        const marker = markers[originalIdx];
+                        
+                        const updatedIcon = L.divIcon({
+                            html: `<div class="w-8 h-8 rounded-full bg-slate-900 border-2 border-primary-500 text-white flex items-center justify-center font-bold shadow-lg">${stopOrder}</div>`,
+                            className: '',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        });
+                        marker.setIcon(updatedIcon);
+                        
+                        destMap.delete(key); // Ensure it only gets numbered on its first visit
+                        stopOrder++;
+                    }
+                });
+
+                // 4. Zoom Map to Fit Route
                 // Ensure starting point is also in bounds (just in case)
                 routeBounds.extend([startPoint.lat, startPoint.lng]);
                 
